@@ -37,6 +37,10 @@ export const tokens = (vars: StyleVars): string => `
   --accessibility-widget-muted: ${vars.muted};
   --accessibility-widget-surface: ${vars.surface};
   --accessibility-widget-on-primary: #ffffff;
+  --accessibility-widget-panel-bg: color-mix(in srgb, var(--accessibility-widget-primary) 24%, #01020f);
+  --accessibility-widget-card-bg: color-mix(in srgb, var(--accessibility-widget-bg) 92%, #ffffff);
+  --accessibility-widget-section-head-bg: color-mix(in srgb, var(--accessibility-widget-text) 7%, #ffffff);
+  --accessibility-widget-info-bg: color-mix(in srgb, var(--accessibility-widget-panel-bg) 9%, #ffffff);
   --accessibility-widget-radius: 8px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--accessibility-widget-text);

@@ -48,8 +48,10 @@ describe('getTranslations', () => {
 
   it('every language has all required keys', () => {
     const keys: Array<keyof ReturnType<typeof getTranslations>> = [
-      'title', 'subtitle', 'widgetSize', 'xlSize', 'profiles', 'contentAdjustments',
-      'colorAdjustments', 'pageStructure', 'structureHeadings', 'structureLandmarks',
+      'title', 'subtitle', 'widgetSettings', 'widgetSize', 'smallSize',
+      'largeSize', 'widgetPosition', 'leftPosition', 'rightPosition',
+      'profiles', 'contentAdjustments', 'colorAdjustments', 'visibilityAdjustments',
+      'pageStructure', 'structureHeadings', 'structureLandmarks',
       'structureLinks', 'noStructureItems', 'untitledHeading', 'untitledLink',
       'resetAll', 'close', 'dyslexia', 'seizureSafe',
       'fontSize', 'legibleFonts', 'dyslexiaFriendly', 'textMagnifier', 'bigCursor', 'readingMask',

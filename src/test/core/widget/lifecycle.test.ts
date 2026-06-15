@@ -43,10 +43,18 @@ describe('Accessibility Widget — constructor', () => {
   })
 
   it('respects custom size', () => {
-    const a = new AccessibilityWidget({ size: 'XL' })
+    const a = new AccessibilityWidget({ size: 'L' })
     a.mount()
     const panel = document.querySelector<HTMLElement>('.accessibility-widget-panel')
-    expect(panel?.dataset.size).toBe('XL')
+    expect(panel?.dataset.size).toBe('L')
+    a.destroy()
+  })
+
+  it('normalizes lowercase custom size', () => {
+    const a = new AccessibilityWidget({ size: 'l' })
+    a.mount()
+    const panel = document.querySelector<HTMLElement>('.accessibility-widget-panel')
+    expect(panel?.dataset.size).toBe('L')
     a.destroy()
   })
 })
@@ -142,6 +150,25 @@ describe('Accessibility Widget — open / close / toggle', () => {
     a.destroy()
   })
 
+  it('Ctrl+U toggles the panel and prevents the browser shortcut', () => {
+    const a = new AccessibilityWidget()
+    a.mount()
+    const event = new KeyboardEvent('keydown', {
+      key: 'u',
+      code: 'KeyU',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    })
+
+    const dispatched = document.dispatchEvent(event)
+
+    expect(dispatched).toBe(false)
+    expect(event.defaultPrevented).toBe(true)
+    expect(a.getIsOpen()).toBe(true)
+    a.destroy()
+  })
+
   it('calls onOpen callback', () => {
     const onOpen = vi.fn()
     const a = new AccessibilityWidget({ onOpen })
@@ -197,19 +224,23 @@ describe('Accessibility Widget — setSize', () => {
     a.mount()
     a.setSize('S')
     expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('S')
-    a.setSize('XL')
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('XL')
+    a.setSize('L')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('L')
+    a.setSize('s')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('S')
+    a.setSize('l')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('L')
     a.destroy()
   })
 })
 
 describe('Accessibility Widget — setPosition / setOffset', () => {
   it('setPosition moves both trigger and panel', () => {
-    const a = new AccessibilityWidget({ position: 'bottom-right' })
+    const a = new AccessibilityWidget({ position: 'right' })
     a.mount()
-    a.setPosition('bottom-left')
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('bottom-left')
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('bottom-left')
+    a.setPosition('left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('left')
     a.destroy()
   })
 

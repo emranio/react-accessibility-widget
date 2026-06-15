@@ -273,15 +273,30 @@ describe('Accessibility Widget — panel click interactions', () => {
     a.destroy()
   })
 
-  it('XL size switch changes widget size', () => {
+  it('L size switch changes widget size', () => {
     const a = new AccessibilityWidget()
     a.mount()
     const panel = document.querySelector('.accessibility-widget-panel')!
     const sizeBtn = panel.querySelector<HTMLButtonElement>('.accessibility-widget-size-switch')!
     sizeBtn.click()
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('XL')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('L')
     document.querySelector<HTMLButtonElement>('.accessibility-widget-panel .accessibility-widget-size-switch')!.click()
     expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.size).toBe('S')
+    a.destroy()
+  })
+
+  it('position switch changes widget anchor', () => {
+    const a = new AccessibilityWidget({ position: 'right' })
+    a.mount()
+    const panel = document.querySelector('.accessibility-widget-panel')!
+    const positionBtn = panel.querySelector<HTMLButtonElement>('.accessibility-widget-position-option[data-position="left"]')!
+    expect(positionBtn.getAttribute('aria-pressed')).toBe('false')
+
+    positionBtn.click()
+
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('left')
+    expect(document.querySelector<HTMLButtonElement>('.accessibility-widget-panel .accessibility-widget-position-option[data-position="left"]')?.getAttribute('aria-pressed')).toBe('true')
     a.destroy()
   })
 })

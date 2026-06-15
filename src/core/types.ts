@@ -6,10 +6,10 @@
  * so it can be imported from anywhere in the core without cycles.
  */
 
-/** Panel size preset. */
-export type WidgetSize = 'S' | 'XL'
-/** Bottom corner the trigger and panel anchor to. */
-export type Position = 'bottom-right' | 'bottom-left'
+/** Panel size preset. Values are case-insensitive at runtime. */
+export type WidgetSize = 'S' | 's' | 'L' | 'l'
+/** Horizontal side the trigger and panel anchor to along the bottom edge. */
+export type Position = 'right' | 'left'
 /** Text-alignment value (`'default'` means "no override"). */
 export type TextAlignment = 'left' | 'center' | 'right' | 'justify' | 'default'
 /** A tool's current level; 0 means off. */

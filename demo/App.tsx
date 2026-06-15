@@ -14,30 +14,31 @@ const THEMES = {
 } as const
 
 const POSITIONS: Array<{ id: Position; corner: string }> = [
-  { id: 'bottom-left', corner: '↙' },
-  { id: 'bottom-right', corner: '↘' },
+  { id: 'left', corner: '↙' },
+  { id: 'right', corner: '↘' },
 ]
 
 const FEATURES: Array<{ icon: keyof typeof GLYPHS; title: string; body: string }> = [
-  { icon: 'profiles', title: '7 Compliance Profiles', body: 'Seizure Safe, Vision Impaired, Light Sensitivity, Color Blind, Dyslexia, ADHD, and Cognitive — each mapped to WCAG criteria.' },
-  { icon: 'type', title: 'Content & Typography', body: 'Font size, line height, letter spacing, text alignment, plus OpenDyslexic and hyperlegible fonts.' },
-  { icon: 'color', title: 'Color & Contrast', body: 'Dark, light, and high contrast, monochrome, invert, and a colour-blind correction filter.' },
-  { icon: 'reading', title: 'Reading Aids', body: 'Text magnifier, reading lens, reading mask, reading guide, and an enlarged cursor.' },
-  { icon: 'i18n', title: 'i18n + RTL', body: 'Six bundled languages including full right-to-left Arabic support.' },
-  { icon: 'theme', title: 'Themeable', body: 'Accent colour and theme tokens, with a configurable trigger position and offset.' },
+  { icon: 'profiles', title: '7 Preset Profiles', body: 'Seizure Safe, Vision Impaired, Light Sensitivity, Color Blind, Dyslexia, ADHD Friendly, and Cognitive Disability.' },
+  { icon: 'type', title: '8 Content Tools', body: 'Legible fonts, title/link highlighting, font size, text magnifier, line height, letter spacing, and text alignment.' },
+  { icon: 'color', title: '6 Color Tools', body: 'Dark, light, and high contrast, plus monochrome, invert colors, and a color-blind visual filter.' },
+  { icon: 'reading', title: '7 Visibility Tools', body: 'Reading lens, big cursor, reading mask, reading guide, page structure, hide media, and reduce animations.' },
+  { icon: 'i18n', title: 'Keyboard + i18n', body: 'Ctrl+U toggles the panel, with six bundled languages and right-to-left Arabic support.' },
+  { icon: 'theme', title: 'Themeable Settings', body: 'Configure title, accent color, panel size, side position, trigger offsets, and theme tokens.' },
 ]
 
 const METRICS = [
   { value: '7', label: 'Profiles' },
-  { value: '20+', label: 'Tools' },
+  { value: '21', label: 'Tools' },
+  { value: '3', label: 'Tool groups' },
   { value: '6', label: 'Languages' },
-  { value: '0', label: 'Runtime deps*' },
 ]
 
 const TABLE_ROWS = [
-  { feature: 'Font sizing', result: 'Live scaling across the host page', target: 'Marketing copy, forms, legal text' },
-  { feature: 'Contrast filters', result: 'One-click visual changes, no app CSS', target: 'Low-vision testing and QA sweeps' },
-  { feature: 'Reading aids', result: 'Cursor, mask, guide, lens, magnifier', target: 'Dense layouts and long-form content' },
+  { feature: 'Profiles', result: 'Apply curated bundles of real widget tools', target: 'Fast accommodation presets' },
+  { feature: 'Content', result: 'Fonts, scale, spacing, link/title highlights, alignment', target: 'Reading comfort and scannability' },
+  { feature: 'Color', result: 'Contrast modes, monochrome, invert, color-blind filter', target: 'Low vision and color perception checks' },
+  { feature: 'Visibility', result: 'Lens, mask, guide, cursor, structure, media, motion', target: 'Focus, navigation, and distraction control' },
 ]
 
 /** Minimal inline line-icons for the feature cards (stroke = currentColor). */
@@ -82,8 +83,8 @@ function heroArt(left: string, right: string): string {
 }
 
 const IFRAME_DOC = `
-  <!doctype html><html lang="en"><body style="margin:0;font-family:Georgia,serif;background:#f4efe7;color:#26221d;display:grid;place-items:center;height:100%;">
-    <div style="padding:20px;text-align:center;"><strong>Embedded preview</strong>
+  <!doctype html><html lang="en"><body style="margin:0;font-family:Georgia,serif;background:#f4efe7;color:#26221d;display:flex;align-items:center;justify-content:flex-start;height:100%;">
+    <div style="box-sizing:border-box;width:100%;padding:20px;text-align:left;"><strong>Embedded preview</strong>
     <p style="margin:8px 0 0;">A mixed-content surface for visual testing.</p></div>
   </body></html>`
 
@@ -110,7 +111,7 @@ function Segmented<T extends string>({ label, value, options, onChange }: {
 
 export default function App() {
   const [widgetTitle, setWidgetTitle] = useState('Accessibility')
-  const [position, setPosition] = useState<Position>('bottom-right')
+  const [position, setPosition] = useState<Position>('right')
   const [size, setSize] = useState<WidgetSize>('S')
   const [offsetX, setOffsetX] = useState(20)
   const [offsetY, setOffsetY] = useState(20)
@@ -184,7 +185,7 @@ export default function App() {
               <div className="pos-pad" role="group" aria-label="Trigger position">
                 {POSITIONS.map(p => (
                   <button key={p.id} type="button" className="pos-cell" data-pos={p.id}
-                    aria-pressed={position === p.id} aria-label={p.id.replace('-', ' ')}
+                    aria-pressed={position === p.id} aria-label={p.id}
                     onClick={() => setPosition(p.id)}>
                     <span aria-hidden="true">{p.corner}</span>
                   </button>
@@ -192,7 +193,7 @@ export default function App() {
               </div>
             </div>
             <Segmented label="Panel size" value={size}
-              options={[{ id: 'S', label: 'Small' }, { id: 'XL', label: 'Large' }]}
+              options={[{ id: 'S', label: 'Small' }, { id: 'L', label: 'Large' }]}
               onChange={setSize} />
             <div className="cfg-field">
               <span className="cfg-label">Offset X <span className="cfg-value">{offsetX}px</span></span>
@@ -226,14 +227,14 @@ export default function App() {
             <p className="eyebrow">Drop-in accessibility overlay</p>
             <h1>The accessibility widget your users deserve.</h1>
             <p className="lede">
-              One component adds compliance-ready profiles, visual adjustments, and reading tools to any React app.
-              Tune the live widget from the panel on the left, then open it from the floating button to feel it.
+              One component adds 7 profiles and 21 content, color, and visibility tools to any React app.
+              Tune the live widget from the panel on the left, then open it from the floating button to test each tool.
             </p>
             <div className="install">
               <code>npm install {PKG}</code>
               <button type="button" className="copy-btn" onClick={copyInstall}>{copied ? 'Copied ✓' : 'Copy'}</button>
             </div>
-            <p className="hero-hint" aria-hidden="true">Open the widget at the <strong>{position.replace('-', ' ')}</strong> ↘</p>
+            <p className="hero-hint" aria-hidden="true">Open the widget on the <strong>{position}</strong> ↘</p>
           </div>
           <img className="hero-art" src={heroArt(accentColor, THEMES[themeName].text)} alt="" />
         </section>
@@ -271,8 +272,8 @@ export default function App() {
           </blockquote>
           <h3>Reading-level adjustments</h3>
           <p>
-            Increase the font size, loosen line height and letter spacing, or switch on the dyslexia-friendly font and
-            watch this paragraph re-flow live. Left-aligning text removes the uneven gaps of justified copy.
+            Increase font size, loosen line height and letter spacing, highlight links or titles, switch fonts, or cycle
+            text alignment and watch this paragraph re-flow live.
           </p>
           <details>
             <summary>Why keep an intentional test surface on the page?</summary>

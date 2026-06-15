@@ -1,12 +1,6 @@
 /**
  * Interactive controls inside the panel body: the size switch, the profile
  * cards, the tool tiles with their level indicators, and the reset bar.
- *
- * Light scheme only. Flat: no gradients or shadows, and no transform-based
- * motion (no hover lift, no press effect). The only motion is the size-switch
- * thumb sliding — that motion *is* the control. Feedback otherwise comes from
- * colour / border changes; active surfaces fill with the accent and use
- * `--accessibility-widget-on-primary` for a legible foreground.
  */
 export const controls = `
 /* ── Size switch ── */
@@ -28,15 +22,15 @@ export const controls = `
 }
 .accessibility-widget-size-switch-track {
   position: relative;
-  width: 66px;
-  height: 32px;
+  width: 150px;
+  height: 44px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accessibility-widget-text) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accessibility-widget-text) 12%, transparent);
+  background: color-mix(in srgb, var(--accessibility-widget-text) 5%, #ffffff);
+  border: 2px solid color-mix(in srgb, var(--accessibility-widget-text) 8%, #ffffff);
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  padding: 3px;
+  padding: 4px;
 }
 .accessibility-widget-size-switch-option {
   position: relative;
@@ -44,60 +38,104 @@ export const controls = `
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 22px;
+  height: 32px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 750;
   line-height: 1;
-  letter-spacing: 0.01em;
-  color: color-mix(in srgb, var(--accessibility-widget-muted) 80%, var(--accessibility-widget-text));
+  letter-spacing: 0;
+  color: #111827;
   transition: color 0.25s ease;
 }
 .accessibility-widget-size-switch-thumb {
   position: absolute;
   z-index: 1;
-  left: 2px;
-  top: 2px;
-  width: calc(50% - 3px);
-  height: 26px;
+  left: 4px;
+  top: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
   border-radius: 999px;
-  background: var(--accessibility-widget-primary);
+  background: #ffffff;
+  border: 2px solid color-mix(in srgb, var(--accessibility-widget-text) 52%, #ffffff);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .accessibility-widget-size-switch[aria-checked="true"] .accessibility-widget-size-switch-thumb {
-  transform: translateX(calc(100% + 2px));
+  transform: translateX(100%);
 }
 .accessibility-widget-size-switch[aria-checked="false"] .accessibility-widget-size-switch-option--s,
 .accessibility-widget-size-switch[aria-checked="true"] .accessibility-widget-size-switch-option--l {
-  color: var(--accessibility-widget-on-primary, #fff);
+  color: #111827;
+}
+
+/* ── Position grid ── */
+.accessibility-widget-position-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.accessibility-widget-position-option {
+  aspect-ratio: 16 / 7;
+  border-radius: 8px;
+  border: 1px solid var(--accessibility-widget-border);
+  background: color-mix(in srgb, var(--accessibility-widget-text) 4%, #ffffff);
+  color: color-mix(in srgb, var(--accessibility-widget-text) 64%, transparent);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1;
+  padding: 6px;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.accessibility-widget-position-option[data-position="left"] span { place-self: end start; }
+.accessibility-widget-position-option[data-position="right"] span { place-self: end end; }
+.accessibility-widget-position-option:hover {
+  border-color: color-mix(in srgb, var(--accessibility-widget-primary) 45%, var(--accessibility-widget-border));
+  color: var(--accessibility-widget-primary);
+}
+.accessibility-widget-position-option:focus-visible {
+  outline: 2px solid var(--accessibility-widget-primary);
+  outline-offset: 3px;
+}
+.accessibility-widget-position-option[aria-pressed="true"] {
+  border-color: var(--accessibility-widget-primary);
+  background: color-mix(in srgb, var(--accessibility-widget-primary) 12%, #ffffff);
+  color: var(--accessibility-widget-primary);
 }
 
 /* ── Profile cards ── */
 .accessibility-widget-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 16px;
 }
+.accessibility-widget-grid-tools { grid-template-columns: repeat(2, 1fr); }
 .accessibility-widget-grid-3 { grid-template-columns: repeat(3, 1fr); }
 [data-size="S"] .accessibility-widget-grid-3 { grid-template-columns: repeat(2, 1fr); }
-.accessibility-widget-grid > *, .accessibility-widget-grid-3 > * { min-width: 0; }
+.accessibility-widget-grid > *, .accessibility-widget-grid-3 > *, .accessibility-widget-grid-tools > * { min-width: 0; }
 
 .accessibility-widget-card {
+  position: relative;
   border: 1px solid var(--accessibility-widget-border);
-  border-radius: 12px;
-  padding: 11px 13px;
-  background: var(--accessibility-widget-bg);
+  border-radius: 8px;
+  padding: 14px 12px 13px;
+  background: #ffffff;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   font: inherit;
   color: inherit;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  min-height: 54px;
+  justify-content: center;
+  gap: 11px;
+  min-height: 96px;
+  width: 100%;
 }
 .accessibility-widget-card:hover {
-  background: var(--accessibility-widget-surface);
+  background: color-mix(in srgb, var(--accessibility-widget-primary) 3%, #ffffff);
   border-color: color-mix(in srgb, var(--accessibility-widget-primary) 45%, var(--accessibility-widget-border));
 }
 .accessibility-widget-card[aria-pressed="true"] {
@@ -106,18 +144,116 @@ export const controls = `
   color: var(--accessibility-widget-on-primary, #fff);
 }
 .accessibility-widget-card[aria-pressed="true"]:hover { background: var(--accessibility-widget-primary); }
-.accessibility-widget-card[aria-pressed="true"] .icon { color: var(--accessibility-widget-on-primary, #fff); }
-.accessibility-widget-card .icon { width: 22px; height: 22px; color: var(--accessibility-widget-muted); flex-shrink: 0; transition: color 0.2s ease; }
+.accessibility-widget-card[aria-pressed="true"] .icon {
+  color: var(--accessibility-widget-on-primary, #fff);
+  border-color: color-mix(in srgb, var(--accessibility-widget-on-primary, #fff) 48%, transparent);
+}
+.accessibility-widget-card .icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accessibility-widget-text);
+  border: 1px solid var(--accessibility-widget-border);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
 .accessibility-widget-card:not([aria-pressed="true"]):hover .icon { color: var(--accessibility-widget-primary); }
-.accessibility-widget-card .icon svg { width: 100%; height: 100%; }
-.accessibility-widget-card .label { font-size: 12px; font-weight: 550; line-height: 1.3; min-width: 0; overflow-wrap: break-word; }
+.accessibility-widget-card .icon svg { width: 22px; height: 22px; }
+.accessibility-widget-card .label {
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: inherit;
+}
+.accessibility-widget-info {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--accessibility-widget-text) 48%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  opacity: 0;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+.accessibility-widget-info-glyph {
+  font-size: 11px;
+  font-weight: 800;
+  font-style: normal;
+  line-height: 1;
+}
+.accessibility-widget-tooltip {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 198px;
+  max-width: calc(100vw - 48px);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accessibility-widget-panel-bg) 82%, #111827);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.accessibility-widget-tooltip::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 7px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.accessibility-widget-card:hover .accessibility-widget-info,
+.accessibility-widget-card:focus-visible .accessibility-widget-info,
+.accessibility-widget-tile:hover .accessibility-widget-info,
+.accessibility-widget-tile:focus-visible .accessibility-widget-info {
+  opacity: 1;
+  background: var(--accessibility-widget-info-bg);
+  color: var(--accessibility-widget-primary);
+}
+.accessibility-widget-card[aria-pressed="true"] .accessibility-widget-info,
+.accessibility-widget-tile[aria-pressed="true"] .accessibility-widget-info {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accessibility-widget-on-primary, #ffffff) 18%, transparent);
+  color: var(--accessibility-widget-on-primary, #ffffff);
+}
+.accessibility-widget-card:hover .accessibility-widget-tooltip,
+.accessibility-widget-tile:hover .accessibility-widget-tooltip,
+.accessibility-widget-info:hover .accessibility-widget-tooltip,
+.accessibility-widget-card:focus-visible .accessibility-widget-tooltip,
+.accessibility-widget-tile:focus-visible .accessibility-widget-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* ── Tiles (content & color adjustments) ── */
 .accessibility-widget-tile {
+  position: relative;
   border: 1px solid var(--accessibility-widget-border);
-  border-radius: 14px;
-  padding: 14px 10px 12px;
-  background: var(--accessibility-widget-bg);
+  border-radius: 8px;
+  padding: 14px 12px 13px;
+  background: #ffffff;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -128,11 +264,11 @@ export const controls = `
   font: inherit;
   color: inherit;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-  min-height: 118px;
+  min-height: 114px;
   width: 100%;
 }
 .accessibility-widget-tile:hover {
-  background: var(--accessibility-widget-surface);
+  background: color-mix(in srgb, var(--accessibility-widget-primary) 3%, #ffffff);
   border-color: color-mix(in srgb, var(--accessibility-widget-primary) 45%, var(--accessibility-widget-border));
 }
 .accessibility-widget-tile[aria-pressed="true"] {
@@ -141,26 +277,48 @@ export const controls = `
   color: var(--accessibility-widget-on-primary, #fff);
 }
 .accessibility-widget-tile[aria-pressed="true"]:hover { background: var(--accessibility-widget-primary); }
-.accessibility-widget-tile[aria-pressed="true"] .icon { color: var(--accessibility-widget-on-primary, #fff); }
-.accessibility-widget-tile .icon { width: 28px; height: 28px; color: var(--accessibility-widget-muted); transition: color 0.2s ease; }
+.accessibility-widget-tile[aria-pressed="true"] .icon {
+  color: var(--accessibility-widget-on-primary, #fff);
+  border-color: color-mix(in srgb, var(--accessibility-widget-on-primary, #fff) 48%, transparent);
+}
+.accessibility-widget-tile .icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accessibility-widget-text);
+  border: 1px solid var(--accessibility-widget-border);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
 .accessibility-widget-tile:not([aria-pressed="true"]):hover .icon { color: var(--accessibility-widget-primary); }
-.accessibility-widget-tile .icon svg { width: 100%; height: 100%; }
-.accessibility-widget-tile .label { font-size: 11px; font-weight: 550; line-height: 1.25; overflow-wrap: break-word; width: 100%; text-align: center; color: inherit; }
+.accessibility-widget-tile .icon svg { width: 22px; height: 22px; }
+.accessibility-widget-tile .label {
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  width: 100%;
+  text-align: center;
+  color: inherit;
+}
 
 /* ── Level indicator bars (centered under each tile) ── */
 .accessibility-widget-levels {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 5px;
+  gap: 7px;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 0;
 }
 .accessibility-widget-levels span {
-  flex: 0 0 16px;
-  height: 4px;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accessibility-widget-text) 14%, transparent);
+  background: color-mix(in srgb, var(--accessibility-widget-text) 16%, transparent);
   transition: background 0.2s ease;
 }
 .accessibility-widget-levels span.active {
@@ -175,21 +333,21 @@ export const controls = `
 
 /* ── Reset bar ── */
 .accessibility-widget-reset-bar {
-  padding: 12px 18px;
-  border-top: 1px solid var(--accessibility-widget-border);
+  padding: 0 12px 10px;
+  border-top: 0;
   flex-shrink: 0;
-  background: var(--accessibility-widget-bg);
+  background: var(--accessibility-widget-panel-bg);
 }
 .accessibility-widget-reset-btn {
   width: 100%;
-  height: 38px;
-  border-radius: 11px;
-  border: 1px solid var(--accessibility-widget-border);
-  background: var(--accessibility-widget-bg);
-  color: var(--accessibility-widget-text);
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--accessibility-widget-primary);
+  color: var(--accessibility-widget-on-primary, #ffffff);
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -198,8 +356,7 @@ export const controls = `
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 .accessibility-widget-reset-btn:hover {
-  background: var(--accessibility-widget-surface);
-  border-color: color-mix(in srgb, var(--accessibility-widget-primary) 45%, var(--accessibility-widget-border));
+  background: color-mix(in srgb, var(--accessibility-widget-primary) 90%, #ffffff);
 }
-.accessibility-widget-reset-btn svg { width: 14px; height: 14px; color: var(--accessibility-widget-muted); }
+.accessibility-widget-reset-btn svg { width: 14px; height: 14px; color: currentColor; }
 `

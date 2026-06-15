@@ -40,20 +40,20 @@ describe('AccessibilityWidget', () => {
   })
 
   it('applies position prop to trigger', () => {
-    render(<AccessibilityWidget position="bottom-left" />)
+    render(<AccessibilityWidget position="left" />)
     const trigger = document.querySelector<HTMLButtonElement>('.accessibility-widget-trigger')
-    expect(trigger?.dataset.position).toBe('bottom-left')
+    expect(trigger?.dataset.position).toBe('left')
   })
 
   it('updates trigger and panel position at runtime', () => {
-    const { rerender } = render(<AccessibilityWidget position="bottom-right" />)
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('bottom-right')
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('bottom-right')
+    const { rerender } = render(<AccessibilityWidget position="right" />)
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('right')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('right')
 
-    rerender(<AccessibilityWidget position="bottom-left" />)
+    rerender(<AccessibilityWidget position="left" />)
 
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('bottom-left')
-    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('bottom-left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('left')
   })
 
   it('applies and updates the trigger offsetX / offsetY CSS variables', () => {

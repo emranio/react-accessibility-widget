@@ -13,7 +13,7 @@ import { releaseFocus, trapFocus } from './keyboard'
 import { collectPageStructure, renderPageStructureDialog } from './page-structure'
 import { loadState, saveState } from './persistence'
 import { PROFILE_PRESETS } from './profiles'
-import { renderPanel } from './render'
+import { renderPanel, type PanelSectionId } from './render'
 import { DEFAULT_VARS, STYLE_ID, buildStyles } from './styles'
 import { LEVEL_TOOLS, TOOL_MAX_LEVELS, type LevelToolKey } from './tool-levels'
 import {
@@ -43,9 +43,19 @@ const COLOR_EXCLUSIVE: Array<keyof AccessibilityWidgetState> = [
 /** Ordered text-alignment values cycled through by the alignment tool. */
 const ALIGNMENT_LEVELS: TextAlignment[] = ['left', 'center', 'right', 'justify']
 
+const PANEL_SECTION_IDS: PanelSectionId[] = ['settings', 'profiles', 'content', 'color', 'visibility']
+
+type NormalizedWidgetSize = 'S' | 'L'
+
 /** Coerce an arbitrary size value to a supported {@link WidgetSize}. */
-function normalizeSize(size: unknown): WidgetSize {
-  return size === 'XL' ? 'XL' : 'S'
+function normalizeSize(size: unknown): NormalizedWidgetSize {
+  return typeof size === 'string' && size.toUpperCase() === 'L' ? 'L' : 'S'
+}
+
+/** Normalize the public side-only position value. */
+function normalizePosition(position: unknown): Position {
+  if (position === 'left') return 'left'
+  return 'right'
 }
 
 /**
@@ -73,7 +83,7 @@ function readableOn(color: string): string {
 
 export class AccessibilityWidget {
   private readonly config: AccessibilityWidgetConfig
-  private size: WidgetSize
+  private size: NormalizedWidgetSize
   private lang: Lang
   private state: AccessibilityWidgetState
   private root: HTMLDivElement | null = null
@@ -84,14 +94,31 @@ export class AccessibilityWidget {
   private isOpen = false
   private pageStructureOpen = false
   private pageStructureTab: PageStructureTab = 'headings'
+  private collapsedSections: Record<PanelSectionId, boolean> = {
+    settings: true,
+    profiles: false,
+    content: false,
+    color: false,
+    visibility: false,
+  }
+  private readonly shortcutListenerOptions: AddEventListenerOptions = { capture: true }
+  private readonly handleGlobalShortcut = (e: KeyboardEvent): void => {
+    const key = e.key.toLowerCase()
+    const isShortcut = e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && (key === 'u' || e.code === 'KeyU')
+    if (!isShortcut) return
+    e.preventDefault()
+    e.stopPropagation()
+    this.toggle()
+  }
 
   constructor(config: AccessibilityWidgetConfig = {}) {
     this.config = {
-      position: 'bottom-right',
+      position: 'right',
       persistence: true,
       lang: 'en',
       ...config,
     }
+    this.config.position = normalizePosition(this.config.position)
     this.size = normalizeSize(this.config.size)
     this.lang = this.config.lang ?? 'en'
     this.state = loadState(this.config.persistence!)
@@ -145,6 +172,7 @@ export class AccessibilityWidget {
     // of #accessibility-widget-host and is never affected by the effects (font-size,
     // contrast, filters etc) applied to the page content wrapper.
     document.body.appendChild(this.root)
+    document.addEventListener('keydown', this.handleGlobalShortcut, this.shortcutListenerOptions)
 
     this.update()
     applyEffects(this.state)
@@ -155,6 +183,7 @@ export class AccessibilityWidget {
     clearEffects()
     unwrapHost()
     releaseFocus()
+    document.removeEventListener('keydown', this.handleGlobalShortcut, this.shortcutListenerOptions)
     if (this.root) {
       this.root.remove()
       this.root = null
@@ -216,18 +245,20 @@ export class AccessibilityWidget {
 
   // ── Runtime configuration setters ──────────────────────────────────────
 
-  /** Change the panel size (S / XL). */
+  /** Change the panel size (S / L). */
   setSize(size: WidgetSize): void {
     this.size = normalizeSize(size)
     if (this.panel) this.panel.dataset.size = this.size
     this.update()
   }
 
-  /** Move the trigger and panel to a different bottom corner. */
+  /** Move the trigger and panel to a different horizontal side. */
   setPosition(position: Position): void {
-    this.config.position = position
-    if (this.trigger) this.trigger.dataset.position = position
-    if (this.panel) this.panel.dataset.position = position
+    const next = normalizePosition(position)
+    this.config.position = next
+    if (this.trigger) this.trigger.dataset.position = next
+    if (this.panel) this.panel.dataset.position = next
+    this.update()
   }
 
   /** Set the trigger's horizontal distance (px) from its anchored edge. */
@@ -331,10 +362,26 @@ export class AccessibilityWidget {
   private handlePanelClick(e: MouseEvent): void {
     const target = e.target as HTMLElement
     if (target.closest<HTMLElement>('.accessibility-widget-close')) { this.close(); return }
+    if (this.handleSectionToggleClick(target)) return
     if (this.handleActionClick(target)) return
     if (this.handleSizeClick(target)) return
+    if (this.handlePositionClick(target)) return
     if (this.handleProfileClick(target)) return
     this.handleToolClick(target)
+  }
+
+  private handleSectionToggleClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-section-toggle]')
+    if (!btn) return false
+    const section = btn.dataset.sectionToggle
+    if (!this.isPanelSection(section)) return true
+    this.collapsedSections[section] = !this.collapsedSections[section]
+    this.update()
+    return true
+  }
+
+  private isPanelSection(section: string | undefined): section is PanelSectionId {
+    return PANEL_SECTION_IDS.includes(section as PanelSectionId)
   }
 
   private handleActionClick(target: HTMLElement): boolean {
@@ -348,6 +395,15 @@ export class AccessibilityWidget {
     const btn = target.closest<HTMLElement>('[data-size]')
     if (!btn || !this.panel?.contains(btn) || !btn.classList.contains('accessibility-widget-size-switch')) return false
     this.setSize(btn.dataset.size as WidgetSize)
+    return true
+  }
+
+  private handlePositionClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-position]')
+    if (!btn || !this.panel?.contains(btn) || !btn.classList.contains('accessibility-widget-position-option')) return false
+    const position = btn.dataset.position
+    if (position !== 'left' && position !== 'right') return true
+    this.setPosition(position)
     return true
   }
 
@@ -484,6 +540,8 @@ export class AccessibilityWidget {
     this.panel.innerHTML = renderPanel(this.state, this.size, this.lang, {
       pageStructureOpen: this.pageStructureOpen,
       title: this.getTitle(),
+      position: this.config.position!,
+      collapsedSections: this.collapsedSections,
     })
     const nextBody = this.panel.querySelector<HTMLElement>('.accessibility-widget-body')
     if (nextBody) nextBody.scrollTop = prevScroll

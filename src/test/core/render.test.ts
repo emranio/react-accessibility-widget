@@ -16,6 +16,7 @@ describe('renderPanel', () => {
   it('renders a custom escaped header title', () => {
     const html = renderPanel(freshState(), 'S', 'en', { title: 'Team <Access> & QA' })
     expect(html).toContain('Team &lt;Access&gt; &amp; QA')
+    expect(html).not.toContain('Team &lt;Access&gt; &amp; QA menu')
     expect(html).not.toContain('Team <Access> & QA')
   })
 
@@ -110,7 +111,7 @@ describe('renderPanel', () => {
 
   it('renders all color tiles', () => {
     const html = renderPanel(freshState(), 'S')
-    expect(html).toContain('Visual Adjustments')
+    expect(html).toContain('Color')
     expect(html).toContain('data-tool="darkContrast"')
     expect(html).toContain('data-tool="lightContrast"')
     expect(html).toContain('data-tool="highContrast"')
@@ -146,18 +147,41 @@ describe('renderPanel', () => {
     expect(html).toContain('data-tool="textAlignment" data-level="2" data-max-level="4" aria-pressed="true"')
   })
 
-  it('renders a single XL size switch', () => {
+  it('renders a single large size switch', () => {
     const html = renderPanel(freshState(), 'S')
     expect(html).toContain('role="switch"')
-    expect(html).toContain('XL Size')
-    expect(html).toContain('data-size="XL"')
+    expect(html).toContain('Small')
+    expect(html).toContain('Large')
+    expect(html).toContain('data-size="L"')
     expect(html).toContain('aria-checked="false"')
   })
 
-  it('marks XL size switch as active', () => {
-    const html = renderPanel(freshState(), 'XL')
+  it('marks L size switch as active', () => {
+    const html = renderPanel(freshState(), 'L')
     expect(html).toContain('data-size="S"')
     expect(html).toContain('aria-checked="true"')
+  })
+
+  it('treats lowercase l size as active large', () => {
+    const html = renderPanel(freshState(), 'l')
+    expect(html).toContain('data-size="S"')
+    expect(html).toContain('aria-checked="true"')
+  })
+
+  it('renders a widget position switch', () => {
+    const html = renderPanel(freshState(), 'S')
+    expect(html).toContain('Widget Position')
+    expect(html).toContain('accessibility-widget-position-grid')
+    expect(html).toContain('data-position="left"')
+    expect(html).toContain('data-position="right"')
+    expect(html).toContain('aria-label="Left"')
+    expect(html).toContain('aria-label="Right"')
+  })
+
+  it('marks left position switch state', () => {
+    const html = renderPanel(freshState(), 'S', 'en', { position: 'left' })
+    expect(html).toContain('data-position="left" aria-pressed="true"')
+    expect(html).toContain('data-position="right" aria-pressed="false"')
   })
 
   it('renders reset button with data-action=reset', () => {
@@ -171,6 +195,15 @@ describe('renderPanel', () => {
   it('does not render page analysis controls', () => {
     const html = renderPanel(freshState(), 'S')
     expect(html).not.toContain('Page Analysis')
+  })
+
+  it('renders tooltip text for every profile and widget tool', () => {
+    const html = renderPanel(freshState(), 'S')
+    const tooltipCount = (html.match(/accessibility-widget-tooltip/g) ?? []).length
+    expect(tooltipCount).toBe(28)
+    expect(html).toContain('Stops animation, hides images')
+    expect(html).toContain('Increases page text size across four levels.')
+    expect(html).toContain('Opens a headings, landmarks, and links navigator')
   })
 })
 

@@ -9,11 +9,17 @@ export interface Translations {
   // Header & chrome
   title: string
   subtitle: string
+  widgetSettings: string
   widgetSize: string
-  xlSize: string
+  widgetPosition: string
+  smallSize: string
+  largeSize: string
+  leftPosition: string
+  rightPosition: string
   profiles: string
   contentAdjustments: string
   colorAdjustments: string
+  visibilityAdjustments: string
   pageStructure: string
   structureHeadings: string
   structureLandmarks: string

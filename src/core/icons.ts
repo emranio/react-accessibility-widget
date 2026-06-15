@@ -12,6 +12,8 @@ import { __iconNode as betweenHorizontalStartIcon } from 'lucide-react/dist/esm/
 import { __iconNode as betweenVerticalStartIcon } from 'lucide-react/dist/esm/icons/between-vertical-start.mjs'
 import { __iconNode as bookOpenTextIcon } from 'lucide-react/dist/esm/icons/book-open-text.mjs'
 import { __iconNode as brainIcon } from 'lucide-react/dist/esm/icons/brain.mjs'
+import { __iconNode as chevronDownIcon } from 'lucide-react/dist/esm/icons/chevron-down.mjs'
+import { __iconNode as chevronUpIcon } from 'lucide-react/dist/esm/icons/chevron-up.mjs'
 import { __iconNode as circleIcon } from 'lucide-react/dist/esm/icons/circle.mjs'
 import { __iconNode as circleOffIcon } from 'lucide-react/dist/esm/icons/circle-off.mjs'
 import { __iconNode as contrastIcon } from 'lucide-react/dist/esm/icons/contrast.mjs'
@@ -74,6 +76,9 @@ export const ICONS = {
   trigger: triggerSvg(),
   close: lucideSvg(xIcon),
   reset: lucideSvg(rotateCcwIcon),
+  chevronDown: lucideSvg(chevronDownIcon),
+  chevronUp: lucideSvg(chevronUpIcon),
+  info: '<span class="accessibility-widget-info-glyph">i</span>',
 
   // Product and profile icons.
   wheelchair: triggerSvg(),

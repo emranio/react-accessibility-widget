@@ -117,14 +117,32 @@ a { color: inherit; }
   gap: 10px;
 }
 .accent-row input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
   flex: 0 0 auto;
   width: 44px;
   height: 38px;
-  padding: 4px;
+  padding: 0;
   border: 1px solid var(--line-strong);
   border-radius: 11px;
-  background: var(--surface);
+  background: var(--demo-accent);
   cursor: pointer;
+  overflow: hidden;
+}
+.accent-row input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.accent-row input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 10px;
+}
+.accent-row input[type="color"]::-moz-color-swatch {
+  border: 0;
+  border-radius: 10px;
+}
+.accent-row input[type="color"]:focus-visible {
+  outline: 2px solid var(--demo-accent);
+  outline-offset: 3px;
 }
 .accent-row code { flex: 0 0 auto; font-family: var(--mono); font-size: 0.82rem; color: var(--ink-muted); }
 
@@ -205,7 +223,7 @@ a { color: inherit; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  max-width: 150px;
+  width: 100%;
 }
 .pos-cell {
   aspect-ratio: 16 / 10;
@@ -219,8 +237,8 @@ a { color: inherit; }
   padding: 6px;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
-.pos-cell[data-pos="bottom-left"] span { place-self: end start; }
-.pos-cell[data-pos="bottom-right"] span { place-self: end end; }
+.pos-cell[data-pos="left"] span { place-self: end start; }
+.pos-cell[data-pos="right"] span { place-self: end end; }
 .pos-cell:hover { border-color: var(--demo-accent); color: var(--ink); }
 .pos-cell[aria-pressed="true"] {
   border-color: var(--demo-accent);
@@ -417,9 +435,26 @@ h1, h2, h3 { font-family: var(--body); letter-spacing: -0.025em; margin: 0; }
   outline: none;
   border-color: var(--demo-accent);
 }
-.choice-row { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
+.choice-row { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 16px; display: grid; gap: 10px; }
 .choice-row legend { font-weight: 600; font-size: 0.9rem; padding: 0 6px; }
-.choice-row label { display: flex; align-items: center; gap: 9px; font-weight: 500; }
+.choice-row label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  width: fit-content;
+  min-width: 0;
+  font-weight: 500;
+}
+.choice-row input[type="radio"] {
+  width: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--demo-accent);
+}
 .submit-btn {
   border: 0;
   border-radius: 12px;

@@ -38,7 +38,7 @@ export default function App() {
       <AccessibilityWidget
         title="React Accessibility Widget"
         accentColor="#17313f"
-        position="bottom-right"
+        position="right"
         size="S"
         colorScheme="light"
         lang="en"
