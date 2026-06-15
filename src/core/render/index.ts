@@ -145,16 +145,15 @@ export function renderPanel(
           </div>
         `)}
 
-        ${sectionCard('content', t.contentAdjustments, collapsedSections.content, `
+        ${sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
           <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-            ${legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts)}
-            ${adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles)}
-            ${adjustmentTile(state, 'fontSize',        ICONS.fontSizing,     t.fontSize, TOOL_TOOLTIPS.fontSize)}
-            ${adjustmentTile(state, 'textMagnifier',   ICONS.textMagnifier,  t.textMagnifier, TOOL_TOOLTIPS.textMagnifier)}
-            ${adjustmentTile(state, 'highlightLinks',  ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks)}
-            ${adjustmentTile(state, 'lineHeight',      ICONS.lineHeight,     t.lineHeight, TOOL_TOOLTIPS.lineHeight)}
-            ${adjustmentTile(state, 'letterSpacing',   ICONS.letterSpacing,  t.letterSpacing, TOOL_TOOLTIPS.letterSpacing)}
-            ${toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment })}
+            ${adjustmentTile(state, 'readingLens',     ICONS.readingLens,    t.readingLens, TOOL_TOOLTIPS.readingLens)}
+            ${adjustmentTile(state, 'bigCursor',       ICONS.bigCursor,      t.bigCursor, TOOL_TOOLTIPS.bigCursor)}
+            ${adjustmentTile(state, 'readingMask',     ICONS.readingMask,    t.readingMask, TOOL_TOOLTIPS.readingMask)}
+            ${adjustmentTile(state, 'readingGuide',    ICONS.readingGuide,   t.readingGuide, TOOL_TOOLTIPS.readingGuide)}
+            ${toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure })}
+            ${adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages)}
+            ${adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations)}
           </div>
         `)}
 
@@ -169,15 +168,16 @@ export function renderPanel(
           </div>
         `)}
 
-        ${sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
+        ${sectionCard('content', t.contentAdjustments, collapsedSections.content, `
           <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-            ${adjustmentTile(state, 'readingLens',     ICONS.readingLens,    t.readingLens, TOOL_TOOLTIPS.readingLens)}
-            ${adjustmentTile(state, 'bigCursor',       ICONS.bigCursor,      t.bigCursor, TOOL_TOOLTIPS.bigCursor)}
-            ${adjustmentTile(state, 'readingMask',     ICONS.readingMask,    t.readingMask, TOOL_TOOLTIPS.readingMask)}
-            ${adjustmentTile(state, 'readingGuide',    ICONS.readingGuide,   t.readingGuide, TOOL_TOOLTIPS.readingGuide)}
-            ${toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure })}
-            ${adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages)}
-            ${adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations)}
+            ${legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts)}
+            ${adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles)}
+            ${adjustmentTile(state, 'fontSize',        ICONS.fontSizing,     t.fontSize, TOOL_TOOLTIPS.fontSize)}
+            ${adjustmentTile(state, 'textMagnifier',   ICONS.textMagnifier,  t.textMagnifier, TOOL_TOOLTIPS.textMagnifier)}
+            ${adjustmentTile(state, 'highlightLinks',  ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks)}
+            ${adjustmentTile(state, 'lineHeight',      ICONS.lineHeight,     t.lineHeight, TOOL_TOOLTIPS.lineHeight)}
+            ${adjustmentTile(state, 'letterSpacing',   ICONS.letterSpacing,  t.letterSpacing, TOOL_TOOLTIPS.letterSpacing)}
+            ${toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment })}
           </div>
         `)}
       </div>

@@ -188,6 +188,19 @@ describe('renderPanel', () => {
     expect(renderPanel(freshState(), 'S')).toContain('data-action="reset"')
   })
 
+  it('orders tool sections as visibility, color, then content after profiles', () => {
+    const html = renderPanel(freshState(), 'S')
+    const profiles = html.indexOf('data-section="profiles"')
+    const visibility = html.indexOf('data-section="visibility"')
+    const color = html.indexOf('data-section="color"')
+    const content = html.indexOf('data-section="content"')
+
+    expect(profiles).toBeGreaterThan(-1)
+    expect(visibility).toBeGreaterThan(profiles)
+    expect(color).toBeGreaterThan(visibility)
+    expect(content).toBeGreaterThan(color)
+  })
+
   it('renders close button', () => {
     expect(renderPanel(freshState(), 'S')).toContain('accessibility-widget-close')
   })
