@@ -14,7 +14,7 @@ describe('renderPanel', () => {
   })
 
   it('renders a custom escaped header title', () => {
-    const html = renderPanel(freshState(), 'S', 'en', { title: 'Team <Access> & QA' })
+    const html = renderPanel(freshState(), 'S', { title: 'Team <Access> & QA' })
     expect(html).toContain('Team &lt;Access&gt; &amp; QA')
     expect(html).not.toContain('Team &lt;Access&gt; &amp; QA menu')
     expect(html).not.toContain('Team <Access> & QA')
@@ -97,7 +97,7 @@ describe('renderPanel', () => {
   })
 
   it('marks page structure tile active when the dialog is open', () => {
-    const html = renderPanel(freshState(), 'S', 'en', { pageStructureOpen: true })
+    const html = renderPanel(freshState(), 'S', { pageStructureOpen: true })
     expect(html).toContain('data-tool="pageStructure" data-level="1" data-max-level="1" aria-pressed="true"')
   })
 
@@ -179,7 +179,7 @@ describe('renderPanel', () => {
   })
 
   it('marks left position switch state', () => {
-    const html = renderPanel(freshState(), 'S', 'en', { position: 'left' })
+    const html = renderPanel(freshState(), 'S', { position: 'left' })
     expect(html).toContain('data-position="left" aria-pressed="true"')
     expect(html).toContain('data-position="right" aria-pressed="false"')
   })
@@ -217,39 +217,5 @@ describe('renderPanel', () => {
     expect(html).toContain('Stops animation, hides images')
     expect(html).toContain('Increases page text size across four levels.')
     expect(html).toContain('Opens a headings, landmarks, and links navigator')
-  })
-})
-
-describe('renderPanel — i18n', () => {
-  it('renders Spanish labels with lang=es', () => {
-    const html = renderPanel(freshState(), 'S', 'es')
-    expect(html).toContain('Configuración de Accesibilidad')
-    expect(html).toContain('Restablecer configuración')
-  })
-
-  it('renders French labels with lang=fr', () => {
-    const html = renderPanel(freshState(), 'S', 'fr')
-    expect(html).toContain("Paramètres d'Accessibilité")
-  })
-
-  it('renders German labels with lang=de', () => {
-    const html = renderPanel(freshState(), 'S', 'de')
-    expect(html).toContain('Barrierefreiheitseinstellungen')
-  })
-
-  it('renders Portuguese labels with lang=pt', () => {
-    const html = renderPanel(freshState(), 'S', 'pt')
-    expect(html).toContain('Configurações de Acessibilidade')
-  })
-
-  it('renders Arabic labels with lang=ar and dir=rtl', () => {
-    const html = renderPanel(freshState(), 'S', 'ar')
-    expect(html).toContain('إعدادات إمكانية الوصول')
-    expect(html).toContain('dir="rtl"')
-  })
-
-  it('falls back to English for unknown lang', () => {
-    const html = renderPanel(freshState(), 'S', 'en')
-    expect(html).toContain('Accessibility Settings')
   })
 })

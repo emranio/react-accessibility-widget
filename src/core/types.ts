@@ -27,9 +27,6 @@ export type AccessibilityProfile =
   | 'adhd-friendly'
   | 'cognitive-disability'
 
-/** Supported UI languages (Arabic renders right-to-left). */
-export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
-
 /** Trigger button colour preset. */
 export type TriggerScheme = 'auto' | 'dark' | 'light'
 
@@ -56,7 +53,6 @@ export interface AccessibilityWidgetConfig {
    */
   triggerScheme?: TriggerScheme
   persistence?: boolean
-  lang?: Lang
   onOpen?: () => void
   onClose?: () => void
   onReset?: () => void

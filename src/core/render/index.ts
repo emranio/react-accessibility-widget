@@ -7,9 +7,9 @@
  * `data-*` attributes embedded here.
  */
 import { ICONS } from '../icons'
-import { getTranslations } from '../i18n'
+import { translations } from '../i18n'
 import { TEXT_ALIGNMENT_MAX_LEVEL } from '../tool-levels'
-import type { AccessibilityProfile, AccessibilityWidgetState, Lang, Position, WidgetSize } from '../types'
+import type { AccessibilityProfile, AccessibilityWidgetState, Position, WidgetSize } from '../types'
 import { escapeHtml } from '../utils/html'
 import {
   adjustmentTile,
@@ -88,10 +88,9 @@ function sectionCard(id: PanelSectionId, label: string, collapsed: boolean, body
 export function renderPanel(
   state: AccessibilityWidgetState,
   size: WidgetSize,
-  lang: Lang = 'en',
   options: { pageStructureOpen?: boolean; title?: string; position?: Position; collapsedSections?: CollapsedSections } = {},
 ): string {
-  const t = getTranslations(lang)
+  const t = translations
   const title = escapeHtml(options.title?.trim() || t.title)
   const position = options.position ?? 'right'
   const collapsedSections = normalizeCollapsedSections(options.collapsedSections)
@@ -106,11 +105,8 @@ export function renderPanel(
     { id: 'cognitive-disability', label: t.cognitiveDisability, icon: ICONS.cognitive },
   ]
 
-  // Arabic is the only RTL language currently bundled.
-  const dir = lang === 'ar' ? ' dir="rtl"' : ''
-
   return `
-    <div class="accessibility-widget-header"${dir}>
+    <div class="accessibility-widget-header">
       <div class="accessibility-widget-header-left">
         <div class="accessibility-widget-header-icon">${ICONS.wheelchair}</div>
         <div class="accessibility-widget-header-text">
@@ -126,7 +122,7 @@ export function renderPanel(
       </div>
     </div>
 
-    <div class="accessibility-widget-body"${dir}>
+    <div class="accessibility-widget-body">
       <div class="accessibility-widget-body-container">
         ${sectionCard('settings', t.widgetSettings, collapsedSections.settings, `
           <div class="accessibility-widget-setting-row">
@@ -183,7 +179,7 @@ export function renderPanel(
       </div>
     </div>
 
-    <div class="accessibility-widget-reset-bar"${dir}>
+    <div class="accessibility-widget-reset-bar">
       <button type="button" class="accessibility-widget-reset-btn" data-action="reset" aria-label="${t.resetAll}">
         ${ICONS.reset}
         ${t.resetAll}

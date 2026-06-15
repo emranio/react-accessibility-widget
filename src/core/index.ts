@@ -11,7 +11,6 @@ export type {
   AccessibilityProfile,
   AccessibilityWidgetConfig,
   AccessibilityWidgetState,
-  Lang,
   PageStructureData,
   PageStructureItem,
   PageStructureTab,

@@ -61,13 +61,11 @@ export function renderPageStructureDialog(
   data: PageStructureData,
   activeTab: PageStructureTab,
   t: Translations,
-  lang: string,
 ): string {
-  const dir = lang === 'ar' ? ' dir="rtl"' : ''
   const items = data[activeTab]
 
   return `
-    <div class="accessibility-widget-structure-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t.pageStructure)}"${dir}>
+    <div class="accessibility-widget-structure-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t.pageStructure)}">
       <div class="accessibility-widget-structure-header">
         <h2>${escapeHtml(t.pageStructure)}</h2>
         <button type="button" class="accessibility-widget-structure-close" data-structure-action="close" aria-label="${escapeHtml(t.close)}">

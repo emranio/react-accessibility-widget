@@ -8,7 +8,7 @@
  */
 import { applyEffects, clearEffects, ensureHostWrapper, unwrapHost } from './effects'
 import { ICONS } from './icons'
-import { getTranslations } from './i18n'
+import { translations } from './i18n'
 import { releaseFocus, trapFocus } from './keyboard'
 import { collectPageStructure, renderPageStructureDialog } from './page-structure'
 import { loadState, saveState } from './persistence'
@@ -22,7 +22,6 @@ import {
   type AccessibilityWidgetConfig,
   type AccessibilityWidgetState,
   type AdjustmentLevel,
-  type Lang,
   type PageStructureTab,
   type Position,
   type TextAlignment,
@@ -96,7 +95,6 @@ function readableOn(color: string): string {
 export class AccessibilityWidget {
   private readonly config: AccessibilityWidgetConfig
   private size: NormalizedWidgetSize
-  private lang: Lang
   private state: AccessibilityWidgetState
   private root: HTMLDivElement | null = null
   private trigger: HTMLButtonElement | null = null
@@ -127,12 +125,10 @@ export class AccessibilityWidget {
     this.config = {
       position: 'right',
       persistence: true,
-      lang: 'en',
       ...config,
     }
     this.config.position = normalizePosition(this.config.position)
     this.size = normalizeSize(this.config.size)
-    this.lang = this.config.lang ?? 'en'
     this.state = loadState(this.config.persistence!)
   }
 
@@ -287,12 +283,6 @@ export class AccessibilityWidget {
     this.applyOffset()
   }
 
-  /** Change the panel language. */
-  setLang(lang: Lang): void {
-    this.lang = lang
-    this.update()
-  }
-
   /** Override the widget title used in the header and accessible labels. */
   setTitle(title?: string): void {
     this.config.title = title
@@ -328,7 +318,7 @@ export class AccessibilityWidget {
   }
 
   private getTitle(): string {
-    return this.config.title?.trim() || getTranslations(this.lang).title
+    return this.config.title?.trim() || translations.title
   }
 
   private getTriggerLabel(title: string): string {
@@ -555,7 +545,7 @@ export class AccessibilityWidget {
     this.updateWidgetLabels()
     this.panel.classList.toggle('open', this.isOpen)
     this.overlay?.classList.toggle('open', this.isOpen)
-    this.panel.innerHTML = renderPanel(this.state, this.size, this.lang, {
+    this.panel.innerHTML = renderPanel(this.state, this.size, {
       pageStructureOpen: this.pageStructureOpen,
       title: this.getTitle(),
       position: this.config.position!,
@@ -656,9 +646,8 @@ export class AccessibilityWidget {
       this.structureDialog.innerHTML = ''
       return
     }
-    const t = getTranslations(this.lang)
-    const data = collectPageStructure(t)
-    this.structureDialog.innerHTML = renderPageStructureDialog(data, this.pageStructureTab, t, this.lang)
+    const data = collectPageStructure(translations)
+    this.structureDialog.innerHTML = renderPageStructureDialog(data, this.pageStructureTab, translations)
   }
 
   private injectStyles(): void {

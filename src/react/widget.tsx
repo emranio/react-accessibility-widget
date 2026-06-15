@@ -37,11 +37,6 @@ export function AccessibilityWidget(props: AccessibilityWidgetProps) {
   // Each prop syncs to the live instance through its dedicated setter.
   useEffect(() => {
     if (!instanceRef.current) return
-    if (props.lang) instanceRef.current.setLang(props.lang)
-  }, [props.lang])
-
-  useEffect(() => {
-    if (!instanceRef.current) return
     if (props.size) instanceRef.current.setSize(props.size)
   }, [props.size])
 

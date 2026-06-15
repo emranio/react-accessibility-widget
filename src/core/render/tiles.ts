@@ -3,7 +3,7 @@
  * cards, and the level-aware tool tiles. Each helper returns an HTML string.
  */
 import { ICONS } from '../icons'
-import type { getTranslations } from '../i18n'
+import type { Translations } from '../i18n'
 import { TOOL_MAX_LEVELS, type LevelToolKey } from '../tool-levels'
 import type { AccessibilityProfile, AccessibilityWidgetState, Position, TextAlignment, WidgetSize } from '../types'
 import { escapeHtml } from '../utils/html'
@@ -103,7 +103,7 @@ export function adjustmentTile(state: AccessibilityWidgetState, key: LevelToolKe
  * or at level 1, and switches to the general "Legible Fonts" label/icon only at
  * level 2 (Atkinson Hyperlegible).
  */
-export function legibleFontsTile(state: AccessibilityWidgetState, t: ReturnType<typeof getTranslations>, tooltip: string): string {
+export function legibleFontsTile(state: AccessibilityWidgetState, t: Translations, tooltip: string): string {
   const isDyslexiaFriendly = state.legibleFonts <= 1
   return adjustmentTile(
     state,

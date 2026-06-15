@@ -41,7 +41,6 @@ export default function App() {
         position="right"
         size="S"
         colorScheme="light"
-        lang="en"
       />
     </>
   )
