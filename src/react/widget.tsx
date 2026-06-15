@@ -37,11 +37,6 @@ export function AccessibilityWidget(props: AccessibilityWidgetProps) {
   // Each prop syncs to the live instance through its dedicated setter.
   useEffect(() => {
     if (!instanceRef.current) return
-    if (props.colorScheme) instanceRef.current.setColorScheme(props.colorScheme)
-  }, [props.colorScheme])
-
-  useEffect(() => {
-    if (!instanceRef.current) return
     if (props.lang) instanceRef.current.setLang(props.lang)
   }, [props.lang])
 
@@ -49,6 +44,21 @@ export function AccessibilityWidget(props: AccessibilityWidgetProps) {
     if (!instanceRef.current) return
     if (props.size) instanceRef.current.setSize(props.size)
   }, [props.size])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    if (props.position) instanceRef.current.setPosition(props.position)
+  }, [props.position])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    instanceRef.current.setOffsetX(props.offsetX)
+  }, [props.offsetX])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    instanceRef.current.setOffsetY(props.offsetY)
+  }, [props.offsetY])
 
   useEffect(() => {
     if (!instanceRef.current) return

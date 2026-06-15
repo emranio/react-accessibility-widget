@@ -8,8 +8,8 @@
 
 /** Panel size preset. */
 export type WidgetSize = 'S' | 'XL'
-/** Corner the trigger and panel anchor to. */
-export type Position = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+/** Bottom corner the trigger and panel anchor to. */
+export type Position = 'bottom-right' | 'bottom-left'
 /** Text-alignment value (`'default'` means "no override"). */
 export type TextAlignment = 'left' | 'center' | 'right' | 'justify' | 'default'
 /** A tool's current level; 0 means off. */
@@ -27,8 +27,6 @@ export type AccessibilityProfile =
   | 'adhd-friendly'
   | 'cognitive-disability'
 
-/** Widget colour scheme. */
-export type ColorScheme = 'light' | 'dark'
 /** Supported UI languages (Arabic renders right-to-left). */
 export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
 
@@ -40,16 +38,19 @@ export interface AccessibilityWidgetConfig {
   title?: string
   accentColor?: string
   position?: Position
+  /** Horizontal distance (px) of the trigger from its anchored edge. Default 20. */
+  offsetX?: number
+  /** Vertical distance (px) of the trigger from the bottom edge. Default 20. */
+  offsetY?: number
   size?: WidgetSize
   theme?: {
     primary?: string
     background?: string
     text?: string
   }
-  colorScheme?: ColorScheme
   /**
-   * Trigger button color preset.
-   * - 'auto'  — matches colorScheme (default)
+   * Trigger button colour preset.
+   * - 'auto'  — filled with the accent colour, white icon (default)
    * - 'dark'  — black background, white icon
    * - 'light' — white background, dark icon
    */

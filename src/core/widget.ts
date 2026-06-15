@@ -22,9 +22,9 @@ import {
   type AccessibilityWidgetConfig,
   type AccessibilityWidgetState,
   type AdjustmentLevel,
-  type ColorScheme,
   type Lang,
   type PageStructureTab,
+  type Position,
   type TextAlignment,
   type TriggerScheme,
   type WidgetSize,
@@ -48,11 +48,33 @@ function normalizeSize(size: unknown): WidgetSize {
   return size === 'XL' ? 'XL' : 'S'
 }
 
+/**
+ * Pick a readable foreground (#fff or near-black) for a given background using
+ * the WCAG relative-luminance formula. Drives `--accessibility-widget-on-primary`
+ * so active tiles, level bars, and the header stay legible against any accent —
+ * including in dark mode, where the accent (not a fixed light token) is the
+ * active-surface colour. Falls back to white for non-hex inputs.
+ */
+function readableOn(color: string): string {
+  const hex = color.trim().replace(/^#/, '')
+  let r: number, g: number, b: number
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16); g = parseInt(hex[1] + hex[1], 16); b = parseInt(hex[2] + hex[2], 16)
+  } else if (hex.length === 6) {
+    r = parseInt(hex.slice(0, 2), 16); g = parseInt(hex.slice(2, 4), 16); b = parseInt(hex.slice(4, 6), 16)
+  } else {
+    return '#ffffff'
+  }
+  if ([r, g, b].some(n => Number.isNaN(n))) return '#ffffff'
+  const lin = (c: number) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4) }
+  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+  return L > 0.45 ? '#0c0c0c' : '#ffffff'
+}
+
 export class AccessibilityWidget {
   private readonly config: AccessibilityWidgetConfig
   private size: WidgetSize
   private lang: Lang
-  private scheme: ColorScheme
   private state: AccessibilityWidgetState
   private root: HTMLDivElement | null = null
   private trigger: HTMLButtonElement | null = null
@@ -68,12 +90,10 @@ export class AccessibilityWidget {
       position: 'bottom-right',
       persistence: true,
       lang: 'en',
-      colorScheme: 'light',
       ...config,
     }
     this.size = normalizeSize(this.config.size)
     this.lang = this.config.lang ?? 'en'
-    this.scheme = this.config.colorScheme ?? 'light'
     this.state = loadState(this.config.persistence!)
   }
 
@@ -89,8 +109,8 @@ export class AccessibilityWidget {
     this.root = document.createElement('div')
     this.root.className = 'accessibility-widget-root'
     this.root.setAttribute('role', 'complementary')
-    this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
     this.applyTheme()
+    this.applyOffset()
 
     this.trigger = document.createElement('button')
     this.trigger.className = 'accessibility-widget-trigger'
@@ -203,6 +223,25 @@ export class AccessibilityWidget {
     this.update()
   }
 
+  /** Move the trigger and panel to a different bottom corner. */
+  setPosition(position: Position): void {
+    this.config.position = position
+    if (this.trigger) this.trigger.dataset.position = position
+    if (this.panel) this.panel.dataset.position = position
+  }
+
+  /** Set the trigger's horizontal distance (px) from its anchored edge. */
+  setOffsetX(offset?: number): void {
+    this.config.offsetX = offset
+    this.applyOffset()
+  }
+
+  /** Set the trigger's vertical distance (px) from the bottom edge. */
+  setOffsetY(offset?: number): void {
+    this.config.offsetY = offset
+    this.applyOffset()
+  }
+
   /** Change the panel language. */
   setLang(lang: Lang): void {
     this.lang = lang
@@ -228,15 +267,6 @@ export class AccessibilityWidget {
     this.applyTheme()
   }
 
-  /** Change the colour scheme; refreshes the trigger when it tracks 'auto'. */
-  setColorScheme(scheme: ColorScheme): void {
-    this.scheme = scheme
-    this.applyScheme()
-    // If trigger is on 'auto' (matches colorScheme), refresh it too so the
-    // trigger color follows when colorScheme changes at runtime.
-    if ((this.config.triggerScheme ?? 'auto') === 'auto') this.applyTriggerScheme()
-  }
-
   /** Override the trigger button colour preset. */
   setTriggerScheme(scheme: TriggerScheme): void {
     this.config.triggerScheme = scheme
@@ -245,9 +275,11 @@ export class AccessibilityWidget {
 
   // ── Theming ────────────────────────────────────────────────────────────
 
-  private applyScheme(): void {
+  private applyOffset(): void {
     if (!this.root) return
-    this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
+    const { offsetX, offsetY } = this.config
+    setCssVar(this.root, '--accessibility-widget-trigger-offset-x', typeof offsetX === 'number' ? `${offsetX}px` : undefined)
+    setCssVar(this.root, '--accessibility-widget-trigger-offset-y', typeof offsetY === 'number' ? `${offsetY}px` : undefined)
   }
 
   private getTitle(): string {
@@ -270,33 +302,28 @@ export class AccessibilityWidget {
     const accentColor = this.config.accentColor?.trim() || this.config.theme?.primary
     const t = this.config.theme
     setCssVar(this.root, '--accessibility-widget-primary', accentColor)
-    setCssVar(this.root, '--accessibility-widget-primary-dark', accentColor)
     setCssVar(this.root, '--accessibility-widget-header-bg', accentColor)
     setCssVar(this.root, '--accessibility-widget-bg', t?.background)
     setCssVar(this.root, '--accessibility-widget-text', t?.text)
+    // Foreground that stays legible on top of the accent (active tiles, header).
+    setCssVar(this.root, '--accessibility-widget-on-primary', accentColor ? readableOn(accentColor) : undefined)
     this.applyTriggerScheme()
   }
 
   private applyTriggerScheme(): void {
     if (!this.root) return
-    // Resolution chain:
-    //   1. explicit config.triggerScheme other than 'auto' wins
-    //   2. 'auto' (or unset) → match this.scheme (the resolved colorScheme,
-    //      which itself defaults to 'light' when not passed)
-    let resolved: 'dark' | 'light'
+    // Resolution:
+    //   - 'dark'  → black fill, white icon
+    //   - 'light' → white fill, dark icon
+    //   - 'auto' (default) → filled with the accent colour, white icon (branded)
     const wanted = this.config.triggerScheme ?? 'auto'
-    if (wanted === 'dark' || wanted === 'light') {
-      resolved = wanted
-    } else {
-      resolved = this.scheme === 'dark' ? 'dark' : 'light'
+    const setTrigger = (bg: string, icon: string) => {
+      this.root!.style.setProperty('--accessibility-widget-trigger-bg', bg)
+      this.root!.style.setProperty('--accessibility-widget-trigger-icon', icon)
     }
-    if (resolved === 'dark') {
-      this.root.style.setProperty('--accessibility-widget-trigger-bg', '#0c0c0c')
-      this.root.style.setProperty('--accessibility-widget-trigger-icon', '#ffffff')
-    } else {
-      this.root.style.setProperty('--accessibility-widget-trigger-bg', '#ffffff')
-      this.root.style.setProperty('--accessibility-widget-trigger-icon', '#0c0c0c')
-    }
+    if (wanted === 'dark') setTrigger('#0c0c0c', '#ffffff')
+    else if (wanted === 'light') setTrigger('#ffffff', '#0c0c0c')
+    else setTrigger('var(--accessibility-widget-primary)', '#ffffff')
   }
 
   // ── Panel click handling ───────────────────────────────────────────────
@@ -461,7 +488,6 @@ export class AccessibilityWidget {
     const nextBody = this.panel.querySelector<HTMLElement>('.accessibility-widget-body')
     if (nextBody) nextBody.scrollTop = prevScroll
     this.renderStructureDialog()
-    this.applyScheme()
   }
 
   private renderStructureDialog(): void {

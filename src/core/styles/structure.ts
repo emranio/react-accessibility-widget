@@ -20,9 +20,8 @@ export const structure = `
   min-width: min(640px, calc(100vw - 32px));
   background: var(--accessibility-widget-bg);
   color: var(--accessibility-widget-text);
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--accessibility-widget-border) 85%, transparent);
-  box-shadow: 0 28px 72px rgba(0,0,0,0.26);
+  border-radius: 16px;
+  border: 1px solid var(--accessibility-widget-border);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -31,11 +30,8 @@ export const structure = `
 .accessibility-widget-structure-header {
   min-height: 62px;
   padding: 14px 22px;
-  background:
-    linear-gradient(135deg,
-      var(--accessibility-widget-primary),
-      color-mix(in srgb, var(--accessibility-widget-primary) 76%, #000));
-  color: var(--accessibility-widget-bg);
+  background: var(--accessibility-widget-primary);
+  color: var(--accessibility-widget-on-primary, #fff);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -58,11 +54,10 @@ export const structure = `
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s ease, transform 0.12s ease;
+  transition: background 0.2s ease;
 }
 .accessibility-widget-structure-close:hover {
-  background: color-mix(in srgb, currentColor 12%, transparent);
-  transform: scale(1.04);
+  background: color-mix(in srgb, currentColor 14%, transparent);
 }
 .accessibility-widget-structure-close svg {
   width: 20px;
@@ -86,7 +81,7 @@ export const structure = `
   font-weight: 650;
   letter-spacing: 0.01em;
   position: relative;
-  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .accessibility-widget-structure-tab:last-child { border-inline-end: 0; }
 .accessibility-widget-structure-tab:hover {
@@ -96,7 +91,15 @@ export const structure = `
 .accessibility-widget-structure-tab[aria-selected="true"] {
   background: var(--accessibility-widget-bg);
   color: var(--accessibility-widget-text);
-  box-shadow: inset 0 -3px 0 var(--accessibility-widget-primary);
+}
+.accessibility-widget-structure-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--accessibility-widget-primary);
 }
 .accessibility-widget-structure-list {
   flex: 1;

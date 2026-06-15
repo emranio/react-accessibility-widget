@@ -11,7 +11,6 @@ export type {
   AccessibilityProfile,
   AccessibilityWidgetConfig,
   AccessibilityWidgetState,
-  ColorScheme,
   Lang,
   PageStructureData,
   PageStructureItem,

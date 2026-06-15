@@ -40,9 +40,29 @@ describe('AccessibilityWidget', () => {
   })
 
   it('applies position prop to trigger', () => {
-    render(<AccessibilityWidget position="top-left" />)
+    render(<AccessibilityWidget position="bottom-left" />)
     const trigger = document.querySelector<HTMLButtonElement>('.accessibility-widget-trigger')
-    expect(trigger?.dataset.position).toBe('top-left')
+    expect(trigger?.dataset.position).toBe('bottom-left')
+  })
+
+  it('updates trigger and panel position at runtime', () => {
+    const { rerender } = render(<AccessibilityWidget position="bottom-right" />)
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('bottom-right')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('bottom-right')
+
+    rerender(<AccessibilityWidget position="bottom-left" />)
+
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-trigger')?.dataset.position).toBe('bottom-left')
+    expect(document.querySelector<HTMLElement>('.accessibility-widget-panel')?.dataset.position).toBe('bottom-left')
+  })
+
+  it('applies and updates the trigger offsetX / offsetY CSS variables', () => {
+    const { rerender } = render(<AccessibilityWidget offsetX={32} offsetY={40} />)
+    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')
+    expect(root?.style.getPropertyValue('--accessibility-widget-trigger-offset-x')).toBe('32px')
+    expect(root?.style.getPropertyValue('--accessibility-widget-trigger-offset-y')).toBe('40px')
+    rerender(<AccessibilityWidget offsetX={12} offsetY={12} />)
+    expect(root?.style.getPropertyValue('--accessibility-widget-trigger-offset-x')).toBe('12px')
   })
 
   it('applies size prop to panel', () => {
@@ -51,20 +71,8 @@ describe('AccessibilityWidget', () => {
     expect(panel?.dataset.size).toBe('S')
   })
 
-  it('applies colorScheme="dark" to root data-scheme', () => {
-    render(<AccessibilityWidget colorScheme="dark" />)
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')
-    expect(root?.dataset.scheme).toBe('dark')
-  })
-
-  it('applies colorScheme="light" to root data-scheme', () => {
-    render(<AccessibilityWidget colorScheme="light" />)
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')
-    expect(root?.dataset.scheme).toBe('light')
-  })
-
   it('only one accessibility-widget-root when AccessibilityWidget is rendered once', () => {
-    render(<AccessibilityWidget colorScheme="dark" />)
+    render(<AccessibilityWidget />)
     expect(document.querySelectorAll('.accessibility-widget-root').length).toBe(1)
   })
 

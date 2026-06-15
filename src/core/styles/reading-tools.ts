@@ -15,7 +15,6 @@ export const readingTools = `
   padding: 10px 14px;
   font-size: 18px;
   max-width: 280px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   color: #0c0c0c;
   line-height: 1.4;
   white-space: normal;
@@ -36,21 +35,9 @@ export const readingTools = `
   border-radius: 50%;
   overflow: hidden;
   background: #fff;
-  border: 4px solid #0c0c0c;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.6),
-    0 16px 40px rgba(0,0,0,0.40),
-    inset 0 0 0 1px rgba(255,255,255,0.4);
+  border: 3px solid #0c0c0c;
   will-change: transform;
   contain: layout paint;
-}
-.accessibility-widget-reading-lens::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  box-shadow: inset 0 0 24px rgba(0,0,0,0.10);
 }
 .accessibility-widget-reading-lens-inner {
   position: absolute;
@@ -104,9 +91,6 @@ export const readingTools = `
   border: var(--accessibility-widget-reading-guide-border, 3px) solid var(--accessibility-widget-reading-guide-edge, #facc15);
   border-radius: 999px;
   background: var(--accessibility-widget-reading-guide-fill, #0c0c0c);
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,0.28),
-    0 0 18px var(--accessibility-widget-reading-guide-glow, rgba(250,204,21,0.34));
   pointer-events: none;
   z-index: 2147483645;
 }

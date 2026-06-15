@@ -1,444 +1,369 @@
 import { useState } from 'react'
 import { AccessibilityWidget } from '../src/react'
-import type { ColorScheme, Lang, Position, TriggerScheme, WidgetSize } from '../src/core'
+import type { Position, WidgetSize } from '../src/core'
 
+const PKG = '@firefam/react-accessibility-widget'
+const REPO = 'https://github.com/firefam/react-accessibility-widget'
+
+/** Accent + surface presets the demo can swap between. */
 const THEMES = {
-  ember: {
-    primary: '#17313f',
-    background: '#fffaf3',
-    text: '#17212b',
-  },
-  grove: {
-    primary: '#1f4d3c',
-    background: '#fbf8f1',
-    text: '#1b241f',
-  },
-  tide: {
-    primary: '#2d325a',
-    background: '#f7f7fb',
-    text: '#161824',
-  },
+  ember: { primary: '#c2410c', background: '#fffaf3', text: '#1c1917' },
+  grove: { primary: '#15803d', background: '#f6fbf6', text: '#14241b' },
+  tide: { primary: '#1d4ed8', background: '#f5f8ff', text: '#0f172a' },
+  plum: { primary: '#7c3aed', background: '#faf5ff', text: '#1e1b2e' },
 } as const
 
-const METRICS = [
-  { label: 'Profiles', value: '7', detail: 'Preset accessibility modes for quick testing.' },
-  { label: 'Languages', value: '6', detail: 'Localized labels with RTL support.' },
-  { label: 'Controls', value: '15+', detail: 'Typography, color, focus, and reading helpers.' },
+const POSITIONS: Array<{ id: Position; corner: string }> = [
+  { id: 'bottom-left', corner: '↙' },
+  { id: 'bottom-right', corner: '↘' },
 ]
 
-const FEATURE_CARDS = [
-  {
-    title: 'Light-sensitive reading',
-    body: 'Switch on Light Sensitivity for a low-glare dark scheme with motion and bright imagery removed.',
-  },
-  {
-    title: 'Structured page testing',
-    body: 'Use headings, forms, tables, and landmark sections to verify keyboard focus, contrast, and reading adjustments.',
-  },
-  {
-    title: 'Reading tools',
-    body: 'Text Magnifier and Reading Lens help inspect tiny labels, dense tables, and mixed media content.',
-  },
+const FEATURES: Array<{ icon: keyof typeof GLYPHS; title: string; body: string }> = [
+  { icon: 'profiles', title: '7 Compliance Profiles', body: 'Seizure Safe, Vision Impaired, Light Sensitivity, Color Blind, Dyslexia, ADHD, and Cognitive — each mapped to WCAG criteria.' },
+  { icon: 'type', title: 'Content & Typography', body: 'Font size, line height, letter spacing, text alignment, plus OpenDyslexic and hyperlegible fonts.' },
+  { icon: 'color', title: 'Color & Contrast', body: 'Dark, light, and high contrast, monochrome, invert, and a colour-blind correction filter.' },
+  { icon: 'reading', title: 'Reading Aids', body: 'Text magnifier, reading lens, reading mask, reading guide, and an enlarged cursor.' },
+  { icon: 'i18n', title: 'i18n + RTL', body: 'Six bundled languages including full right-to-left Arabic support.' },
+  { icon: 'theme', title: 'Themeable', body: 'Accent colour and theme tokens, with a configurable trigger position and offset.' },
+]
+
+const METRICS = [
+  { value: '7', label: 'Profiles' },
+  { value: '20+', label: 'Tools' },
+  { value: '6', label: 'Languages' },
+  { value: '0', label: 'Runtime deps*' },
 ]
 
 const TABLE_ROWS = [
-  { feature: 'Font sizing', result: 'Live scaling across the host page', target: 'Marketing copy, forms, and legal text' },
-  { feature: 'Contrast filters', result: 'One-click visual changes without touching app CSS', target: 'Low-vision testing and QA sweeps' },
-  { feature: 'Reading aids', result: 'Cursor, mask, guide, lens, and magnifier helpers', target: 'Dense layouts and long-form content' },
+  { feature: 'Font sizing', result: 'Live scaling across the host page', target: 'Marketing copy, forms, legal text' },
+  { feature: 'Contrast filters', result: 'One-click visual changes, no app CSS', target: 'Low-vision testing and QA sweeps' },
+  { feature: 'Reading aids', result: 'Cursor, mask, guide, lens, magnifier', target: 'Dense layouts and long-form content' },
 ]
 
-function makeArt(title: string, left: string, right: string) {
-  return `data:image/svg+xml;utf8,${encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-label="${title}">
-      <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${left}" />
-          <stop offset="100%" stop-color="${right}" />
-        </linearGradient>
-      </defs>
-      <rect width="760" height="520" rx="36" fill="#f8f4ec" />
-      <rect x="42" y="42" width="676" height="436" rx="28" fill="url(#g)" opacity="0.18" />
-      <rect x="84" y="104" width="288" height="232" rx="24" fill="#fffdf8" />
-      <rect x="404" y="86" width="234" height="54" rx="18" fill="#fffdf8" />
-      <rect x="404" y="164" width="272" height="20" rx="10" fill="#fffdf8" opacity="0.9" />
-      <rect x="404" y="202" width="224" height="20" rx="10" fill="#fffdf8" opacity="0.7" />
-      <rect x="404" y="240" width="250" height="20" rx="10" fill="#fffdf8" opacity="0.55" />
-      <circle cx="186" cy="220" r="82" fill="url(#g)" />
-      <circle cx="566" cy="356" r="86" fill="url(#g)" opacity="0.42" />
-      <rect x="108" y="370" width="246" height="24" rx="12" fill="#fffdf8" opacity="0.9" />
-      <rect x="108" y="410" width="202" height="24" rx="12" fill="#fffdf8" opacity="0.72" />
+/** Minimal inline line-icons for the feature cards (stroke = currentColor). */
+const GLYPHS = {
+  profiles: <><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><path d="M16 6a3 3 0 0 1 0 6" /><path d="M17.5 19a5.5 5.5 0 0 0-3-4.9" /></>,
+  type: <><path d="M5 18 11 6l6 12" /><path d="M7.5 13.5h7" /></>,
+  color: <><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v17" /><path d="M12 12a8.5 8.5 0 0 0 0-8.5" fill="currentColor" stroke="none" /></>,
+  reading: <><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="2.6" /></>,
+  i18n: <><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17" /><path d="M12 3.5c2.6 2.4 4 5.4 4 8.5s-1.4 6.1-4 8.5c-2.6-2.4-4-5.4-4-8.5s1.4-6.1 4-8.5Z" /></>,
+  theme: <><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-1 2-1.8 0-1.4-1.4-1.6-1.4-2.7 0-.8.7-1.5 1.6-1.5h1.6a4.1 4.1 0 0 0 4.1-4.6C20.7 6 16.8 3.5 12 3.5Z" /><circle cx="8" cy="11" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" /><circle cx="16" cy="11" r="1" fill="currentColor" stroke="none" /></>,
+} as const
+
+function Icon({ name }: { name: keyof typeof GLYPHS }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {GLYPHS[name]}
     </svg>
-  `)}`
+  )
 }
 
-const HERO_ART = makeArt('Abstract interface composition', '#d96b3b', '#255d67')
-const AUDIT_ART = makeArt('Intentional audit sandbox graphic', '#c15555', '#735ac7')
+/** Abstract SVG used as the hero artwork. */
+function heroArt(left: string, right: string): string {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-label="Abstract interface composition">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${left}"/><stop offset="100%" stop-color="${right}"/>
+        </linearGradient>
+      </defs>
+      <rect width="720" height="520" rx="32" fill="#ffffff" opacity="0.6"/>
+      <rect x="40" y="40" width="640" height="440" rx="26" fill="url(#g)" opacity="0.16"/>
+      <rect x="80" y="96" width="300" height="232" rx="22" fill="#ffffff"/>
+      <rect x="408" y="84" width="232" height="52" rx="16" fill="#ffffff"/>
+      <rect x="408" y="160" width="262" height="18" rx="9" fill="#ffffff" opacity="0.9"/>
+      <rect x="408" y="196" width="214" height="18" rx="9" fill="#ffffff" opacity="0.7"/>
+      <rect x="408" y="232" width="240" height="18" rx="9" fill="#ffffff" opacity="0.55"/>
+      <circle cx="180" cy="212" r="78" fill="url(#g)"/>
+      <circle cx="556" cy="352" r="84" fill="url(#g)" opacity="0.4"/>
+      <rect x="104" y="356" width="236" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+      <rect x="104" y="394" width="192" height="22" rx="11" fill="#ffffff" opacity="0.7"/>
+    </svg>`)}`
+}
+
 const IFRAME_DOC = `
-  <!doctype html>
-  <html lang="en">
-    <body style="margin:0;font-family:Georgia,serif;background:#f4efe7;color:#26221d;display:grid;place-items:center;height:100%;">
-      <div style="padding:20px;text-align:center;">
-        <strong>Embedded preview</strong>
-        <p style="margin:8px 0 0;">This iframe gives the demo a mixed-content surface for visual testing.</p>
+  <!doctype html><html lang="en"><body style="margin:0;font-family:Georgia,serif;background:#f4efe7;color:#26221d;display:grid;place-items:center;height:100%;">
+    <div style="padding:20px;text-align:center;"><strong>Embedded preview</strong>
+    <p style="margin:8px 0 0;">A mixed-content surface for visual testing.</p></div>
+  </body></html>`
+
+/** Segmented control used throughout the config rail. */
+function Segmented<T extends string>({ label, value, options, onChange }: {
+  label: string
+  value: T
+  options: Array<{ id: T; label: string }>
+  onChange: (v: T) => void
+}) {
+  return (
+    <div className="cfg-field">
+      <span className="cfg-label">{label}</span>
+      <div className="segmented" role="group" aria-label={label}>
+        {options.map(o => (
+          <button key={o.id} type="button" className="seg" aria-pressed={value === o.id} onClick={() => onChange(o.id)}>
+            {o.label}
+          </button>
+        ))}
       </div>
-    </body>
-  </html>
-`
+    </div>
+  )
+}
 
 export default function App() {
-  const [widgetTitle, setWidgetTitle] = useState('React Accessibility Widget')
+  const [widgetTitle, setWidgetTitle] = useState('Accessibility')
   const [position, setPosition] = useState<Position>('bottom-right')
   const [size, setSize] = useState<WidgetSize>('S')
-  const [lang, setLang] = useState<Lang>('en')
-  const [colorScheme, setColorScheme] = useState<ColorScheme>('light')
-  const [triggerScheme, setTriggerScheme] = useState<TriggerScheme>('auto')
-  const [themeName, setThemeName] = useState<keyof typeof THEMES>('ember')
-  const [accentColor, setAccentColor] = useState<string>(THEMES.ember.primary)
+  const [offsetX, setOffsetX] = useState(20)
+  const [offsetY, setOffsetY] = useState(20)
+  const [themeName, setThemeName] = useState<keyof typeof THEMES>('tide')
+  const [accentColor, setAccentColor] = useState<string>(THEMES.tide.primary)
+  const [copied, setCopied] = useState(false)
+
   const widgetTheme = { ...THEMES[themeName], primary: accentColor }
 
+  const snippet = `<AccessibilityWidget
+  title="${widgetTitle || 'Accessibility'}"
+  accentColor="${accentColor}"
+  position="${position}"
+  offsetX={${offsetX}}
+  offsetY={${offsetY}}
+  size="${size}"
+/>`
+
+  function copyInstall() {
+    navigator.clipboard?.writeText(`npm install ${PKG}`).then(() => {
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1600)
+    }).catch(() => {})
+  }
+
   return (
-    <>
-      <div className={`demo-shell scheme-${colorScheme}`}>
-        <header className="site-header reveal">
-          <div className="brand-lockup">
-            <p className="eyebrow">firefam</p>
-            <h1>React Accessibility Widget</h1>
-            <p className="lede">
-              A live demo page with real semantic content, interactive controls, and an intentional visual sandbox so you can
-              exercise the widget visually instead of testing against a blank page.
-            </p>
+    <div className="playground" style={{ ['--demo-accent' as string]: accentColor }}>
+      {/* ── Left configuration rail ── */}
+      <aside className="config-rail" aria-label="Widget configuration">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 0C7.17395 0 0 7.17395 0 16C0 24.826 7.17395 32 16 32C24.826 32 32 24.826 32 16C32 7.17395 24.826 0 16 0ZM16 29.7674C8.4093 29.7674 2.23256 23.5907 2.23256 16C2.23256 8.4093 8.4093 2.23256 16 2.23256C23.5907 2.23256 29.7674 8.4093 29.7674 16C29.7674 23.5907 23.5907 29.7674 16 29.7674ZM13.0233 8.55814C13.0233 6.92093 14.3628 5.5814 16 5.5814C17.6372 5.5814 18.9767 6.92093 18.9767 8.55814C18.9767 10.1953 17.6372 11.5349 16 11.5349C14.3628 11.5349 13.0233 10.1953 13.0233 8.55814ZM17.1163 16.8037V18.6047L21.3581 24.2605C21.7302 24.7516 21.626 25.4512 21.1349 25.8233C20.9414 25.9721 20.7033 26.0465 20.4651 26.0465C20.1228 26.0465 19.7953 25.8977 19.5721 25.6L16 20.8372L12.4279 25.6C12.0558 26.0912 11.3563 26.1953 10.8651 25.8233C10.374 25.4512 10.2698 24.7516 10.6419 24.2605L14.8837 18.6047V16.8037L11.1777 15.5684C10.5972 15.3749 10.2698 14.7349 10.4781 14.1544C10.6716 13.574 11.2967 13.2465 11.8921 13.4549L16 14.8242L20.1079 13.4549C20.7033 13.2614 21.3284 13.574 21.5219 14.1544C21.7153 14.7349 21.4028 15.3749 20.8223 15.5684L17.1163 16.8037Z" fill="currentColor" /></svg>
+          </span>
+          <div>
+            <p className="brand-name">Accessibility Widget</p>
+            <p className="brand-tag">Live playground</p>
           </div>
-          <nav className="top-nav" aria-label="Section navigation">
-            <a href="#overview">Overview</a>
-            <a href="#landmarks">Landmarks</a>
-            <a href="#forms">Forms</a>
-            <a href="#audit">Audit Lab</a>
-          </nav>
-        </header>
+        </div>
 
-        <main id="main" className="site-main">
-          <section id="overview" className="hero-grid reveal">
-            <article className="hero-card">
-              <div className="hero-copy">
-                <p className="eyebrow">Live showcase</p>
-                <h2>Stress-test the widget against mixed content</h2>
-                <p>
-                  This page includes headings, cards, forms, a table, details/summary, an image, an iframe, and dense
-                  reading surfaces so the widget has realistic content to adjust.
-                </p>
-                <div className="hero-actions">
-                  <button type="button">Primary Action</button>
-                  <a href="#audit" className="ghost-action">Jump to audit sandbox</a>
+        <div className="cfg-scroll">
+          <section className="cfg-group">
+            <h2 className="cfg-group-title">Branding</h2>
+            <div className="cfg-field">
+              <label className="cfg-label" htmlFor="cfg-title">Widget title</label>
+              <input id="cfg-title" type="text" value={widgetTitle} placeholder="Accessibility"
+                onChange={e => setWidgetTitle(e.target.value)} />
+            </div>
+            <div className="cfg-field">
+              <span className="cfg-label">Accent colour</span>
+              <div className="accent-row">
+                <input type="color" value={accentColor} aria-label="Accent colour"
+                  onInput={e => setAccentColor(e.currentTarget.value)}
+                  onChange={e => setAccentColor(e.currentTarget.value)} />
+                <code>{accentColor}</code>
+                <div className="swatches" role="group" aria-label="Theme presets">
+                  {(Object.keys(THEMES) as Array<keyof typeof THEMES>).map(key => (
+                    <button key={key} type="button" className="swatch" aria-label={key}
+                      aria-pressed={themeName === key && accentColor === THEMES[key].primary}
+                      style={{ background: THEMES[key].primary }}
+                      onClick={() => { setThemeName(key); setAccentColor(THEMES[key].primary) }} />
+                  ))}
                 </div>
-                <ul className="bullet-strip">
-                  <li>Keyboard focus targets</li>
-                  <li>Text scaling coverage</li>
-                  <li>Landmark visualization</li>
-                </ul>
               </div>
-              <img
-                className="hero-art"
-                src={HERO_ART}
-                alt="Abstract layout showing layered cards, focus zones, and reading surfaces"
-              />
-            </article>
+            </div>
+          </section>
 
-            <aside className="control-card">
-              <p className="eyebrow">Widget controls</p>
-              <h2>Change live props from the page</h2>
-              <div className="control-grid">
-                <label>
-                  Widget title
-                  <input
-                    type="text"
-                    value={widgetTitle}
-                    onChange={event => setWidgetTitle(event.target.value)}
-                    placeholder="React Accessibility Widget"
-                  />
-                </label>
-
-                <label>
-                  Accent color
-                  <span className="color-row">
-                    <input
-                      type="color"
-                      value={accentColor}
-                      onInput={event => setAccentColor(event.currentTarget.value)}
-                      onChange={event => setAccentColor(event.currentTarget.value)}
-                      aria-label="Widget accent color"
-                    />
-                    <span>{accentColor}</span>
-                  </span>
-                </label>
-
-                <label>
-                  Position
-                  <select value={position} onChange={event => setPosition(event.target.value as Position)}>
-                    <option value="bottom-right">Bottom right</option>
-                    <option value="bottom-left">Bottom left</option>
-                    <option value="top-right">Top right</option>
-                    <option value="top-left">Top left</option>
-                  </select>
-                </label>
-
-                <label>
-                  Size
-                  <select value={size} onChange={event => setSize(event.target.value as WidgetSize)}>
-                    <option value="S">Small</option>
-                    <option value="XL">XL</option>
-                  </select>
-                </label>
-
-                <label>
-                  Language
-                  <select value={lang} onChange={event => setLang(event.target.value as Lang)}>
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ar">Arabic</option>
-                  </select>
-                </label>
-
-                <label>
-                  Color scheme
-                  <select value={colorScheme} onChange={event => setColorScheme(event.target.value as ColorScheme)}>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                  </select>
-                </label>
-
-                <label>
-                  Trigger scheme
-                  <select value={triggerScheme} onChange={event => setTriggerScheme(event.target.value as TriggerScheme)}>
-                    <option value="auto">Auto</option>
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="theme-picker" role="group" aria-label="Widget theme presets">
-                {Object.keys(THEMES).map(key => (
-                  <button
-                    key={key}
-                    type="button"
-                    className="theme-pill"
-                    aria-pressed={themeName === key}
-                    onClick={() => {
-                      const nextTheme = key as keyof typeof THEMES
-                      setThemeName(nextTheme)
-                      setAccentColor(THEMES[nextTheme].primary)
-                    }}
-                  >
-                    {key}
+          <section className="cfg-group">
+            <h2 className="cfg-group-title">Placement</h2>
+            <div className="cfg-field">
+              <span className="cfg-label">Trigger position</span>
+              <div className="pos-pad" role="group" aria-label="Trigger position">
+                {POSITIONS.map(p => (
+                  <button key={p.id} type="button" className="pos-cell" data-pos={p.id}
+                    aria-pressed={position === p.id} aria-label={p.id.replace('-', ' ')}
+                    onClick={() => setPosition(p.id)}>
+                    <span aria-hidden="true">{p.corner}</span>
                   </button>
                 ))}
               </div>
-
-              <dl className="state-list">
-                <div>
-                  <dt>Current widget</dt>
-                  <dd>{size} / {lang} / {position} / {accentColor}</dd>
-                </div>
-                <div>
-                  <dt>Widget title</dt>
-                  <dd>{widgetTitle || 'Default title'}</dd>
-                </div>
-                <div>
-                  <dt>Best first check</dt>
-                  <dd>Open the widget, try Seizure Safe or Light Sensitivity, then test the reading aids over dense content.</dd>
-                </div>
-              </dl>
-            </aside>
+            </div>
+            <Segmented label="Panel size" value={size}
+              options={[{ id: 'S', label: 'Small' }, { id: 'XL', label: 'Large' }]}
+              onChange={setSize} />
+            <div className="cfg-field">
+              <span className="cfg-label">Offset X <span className="cfg-value">{offsetX}px</span></span>
+              <input className="slider" type="range" min={8} max={64} step={2} value={offsetX}
+                aria-label="Trigger horizontal offset"
+                onChange={e => setOffsetX(Number(e.target.value))} />
+            </div>
+            <div className="cfg-field">
+              <span className="cfg-label">Offset Y <span className="cfg-value">{offsetY}px</span></span>
+              <input className="slider" type="range" min={8} max={64} step={2} value={offsetY}
+                aria-label="Trigger vertical offset"
+                onChange={e => setOffsetY(Number(e.target.value))} />
+            </div>
           </section>
 
-          <section className="metrics-grid reveal" aria-label="Key widget metrics">
-            {METRICS.map(metric => (
-              <article key={metric.label} className="metric-card">
-                <p className="metric-value">{metric.value}</p>
-                <h2>{metric.label}</h2>
-                <p>{metric.detail}</p>
-              </article>
-            ))}
+          <section className="cfg-group">
+            <h2 className="cfg-group-title">Current config</h2>
+            <pre className="snippet"><code>{snippet}</code></pre>
+            <div className="rail-links">
+              <a className="rail-link" href={`https://www.npmjs.com/package/${PKG}`} target="_blank" rel="noreferrer">npm</a>
+              <a className="rail-link" href={REPO} target="_blank" rel="noreferrer">GitHub</a>
+            </div>
           </section>
+        </div>
+      </aside>
 
-          <section id="landmarks" className="content-grid reveal">
-            <article className="story-card">
-              <p className="eyebrow">Semantic landmarks</p>
-              <h2>Readable content with varied structure</h2>
-              <p>
-                Long-form paragraphs are useful for testing font sizing, line height, letter spacing, and the reading
-                lens. Use the widget controls to increase density or loosen spacing and watch how the prose adapts.
-              </p>
-              <blockquote>
-                Good accessibility tooling is easier to trust when it can be exercised against content that looks like a real
-                product instead of a synthetic sample.
-              </blockquote>
-              <p>
-                The demo also includes links, buttons, tables, form fields, summary elements, and multiple landmarks so the
-                visual and reading adjustment tools can be tested in context.
-              </p>
+      {/* ── Right content ── */}
+      <main className="content" id="main">
+        <section className="hero">
+          <div className="hero-copy">
+            <p className="eyebrow">Drop-in accessibility overlay</p>
+            <h1>The accessibility widget your users deserve.</h1>
+            <p className="lede">
+              One component adds compliance-ready profiles, visual adjustments, and reading tools to any React app.
+              Tune the live widget from the panel on the left, then open it from the floating button to feel it.
+            </p>
+            <div className="install">
+              <code>npm install {PKG}</code>
+              <button type="button" className="copy-btn" onClick={copyInstall}>{copied ? 'Copied ✓' : 'Copy'}</button>
+            </div>
+            <p className="hero-hint" aria-hidden="true">Open the widget at the <strong>{position.replace('-', ' ')}</strong> ↘</p>
+          </div>
+          <img className="hero-art" src={heroArt(accentColor, THEMES[themeName].text)} alt="" />
+        </section>
 
-              <details>
-                <summary>Why keep an intentional visual sandbox on the page?</summary>
-                <p>
-                  Because widget behavior is easier to validate against realistic friction. This page includes dense prose,
-                  mixed controls, media, and compact links so manual visual QA has useful targets.
-                </p>
-              </details>
+        <section className="metrics" aria-label="At a glance">
+          {METRICS.map(m => (
+            <div key={m.label} className="metric">
+              <span className="metric-value">{m.value}</span>
+              <span className="metric-label">{m.label}</span>
+            </div>
+          ))}
+        </section>
+
+        <section className="features" aria-label="Features">
+          {FEATURES.map(f => (
+            <article key={f.title} className="feature">
+              <span className="feature-icon"><Icon name={f.icon} /></span>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
             </article>
+          ))}
+        </section>
 
-            <aside className="stack-card">
-              <h3>Try these visual checks</h3>
-              <div className="feature-stack">
-                {FEATURE_CARDS.map(card => (
-                  <article key={card.title} className="mini-card">
-                    <h4>{card.title}</h4>
-                    <p>{card.body}</p>
-                  </article>
+        <section className="prose-card">
+          <p className="eyebrow">Sample content</p>
+          <h2>What is web accessibility?</h2>
+          <p>
+            Web accessibility means people with disabilities can perceive, understand, navigate, and interact with the
+            web. This page is dense on purpose — headings, prose, quotes, a form, a table, and media give the widget
+            real content to adjust so you can judge each tool in context.
+          </p>
+          <blockquote>
+            Good accessibility tooling is easier to trust when it can be exercised against content that looks like a real
+            product instead of a synthetic sample.
+          </blockquote>
+          <h3>Reading-level adjustments</h3>
+          <p>
+            Increase the font size, loosen line height and letter spacing, or switch on the dyslexia-friendly font and
+            watch this paragraph re-flow live. Left-aligning text removes the uneven gaps of justified copy.
+          </p>
+          <details>
+            <summary>Why keep an intentional test surface on the page?</summary>
+            <p>
+              Widget behaviour is easier to validate against realistic friction: dense prose, mixed controls, media, and
+              compact links give manual visual QA useful targets.
+            </p>
+          </details>
+        </section>
+
+        <div className="split">
+          <section className="form-card">
+            <p className="eyebrow">Interactive controls</p>
+            <h2>Sample form</h2>
+            <form className="demo-form" onSubmit={e => e.preventDefault()}>
+              <label>Full name
+                <input type="text" name="fullName" placeholder="Ari Mason" />
+              </label>
+              <label>Email address
+                <input type="email" name="email" placeholder="ari@example.com" />
+              </label>
+              <label>Team size
+                <select name="teamSize" defaultValue="6-20">
+                  <option value="1-5">1–5 people</option>
+                  <option value="6-20">6–20 people</option>
+                  <option value="21-50">21–50 people</option>
+                  <option value="50+">50+ people</option>
+                </select>
+              </label>
+              <label>Notes
+                <textarea name="notes" rows={3} placeholder="What kind of review are you running?" />
+              </label>
+              <fieldset className="choice-row">
+                <legend>Preferred review path</legend>
+                <label><input type="radio" name="path" defaultChecked /> Visual pass</label>
+                <label><input type="radio" name="path" /> Reading-aid pass</label>
+              </fieldset>
+              <button type="submit" className="submit-btn">Submit</button>
+            </form>
+          </section>
+
+          <section className="table-card">
+            <p className="eyebrow">Coverage</p>
+            <h2>Feature at a glance</h2>
+            <table>
+              <thead>
+                <tr><th scope="col">Feature</th><th scope="col">What it changes</th><th scope="col">Best for</th></tr>
+              </thead>
+              <tbody>
+                {TABLE_ROWS.map(r => (
+                  <tr key={r.feature}><th scope="row">{r.feature}</th><td>{r.result}</td><td>{r.target}</td></tr>
                 ))}
-              </div>
-            </aside>
+              </tbody>
+            </table>
+            <div className="media-row">
+              <img src={heroArt(THEMES[themeName].text, accentColor)} alt="Decorative abstract composition" />
+              <iframe title="Embedded preview" srcDoc={IFRAME_DOC} />
+            </div>
           </section>
+        </div>
 
-          <section id="forms" className="lab-grid reveal">
-            <article className="form-card">
-              <p className="eyebrow">Interactive controls</p>
-              <h2>Forms, labels, and dense UI</h2>
-              <form className="demo-form">
-                <label>
-                  Full name
-                  <input type="text" name="fullName" placeholder="Ari Mason" />
-                </label>
+        <section className="quickstart">
+          <p className="eyebrow">Quick start</p>
+          <h2>Add it in two lines</h2>
+          <pre className="code-block"><code>{`import { AccessibilityWidget } from '${PKG}'
 
-                <label>
-                  Email address
-                  <input type="email" name="email" placeholder="ari@example.com" />
-                </label>
+export default function App() {
+  return (
+    <>
+      <YourApp />
+${snippet.split('\n').map(l => '      ' + l).join('\n')}
+    </>
+  )
+}`}</code></pre>
+        </section>
 
-                <label>
-                  Team size
-                  <select name="teamSize" defaultValue="6-20">
-                    <option value="1-5">1-5 people</option>
-                    <option value="6-20">6-20 people</option>
-                    <option value="21-50">21-50 people</option>
-                    <option value="50+">50+ people</option>
-                  </select>
-                </label>
-
-                <label>
-                  Notes
-                  <textarea name="notes" rows={4} placeholder="What kind of accessibility review are you running?" />
-                </label>
-
-                <fieldset className="choice-row">
-                  <legend>Preferred review path</legend>
-                  <label><input type="radio" name="path" defaultChecked /> Visual pass</label>
-                  <label><input type="radio" name="path" /> Keyboard pass</label>
-                  <label><input type="radio" name="path" /> Reading aid pass</label>
-                </fieldset>
-
-                <label className="checkbox-row">
-                  <input type="checkbox" defaultChecked />
-                  Send a follow-up checklist
-                </label>
-              </form>
-            </article>
-
-            <article className="table-card">
-              <p className="eyebrow">Comparison table</p>
-              <h2>Feature coverage at a glance</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Feature</th>
-                    <th scope="col">What it changes</th>
-                    <th scope="col">Best used for</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {TABLE_ROWS.map(row => (
-                    <tr key={row.feature}>
-                      <th scope="row">{row.feature}</th>
-                      <td>{row.result}</td>
-                      <td>{row.target}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </article>
-          </section>
-
-          <section id="audit" className="audit-grid reveal">
-            <article className="audit-card">
-              <p className="eyebrow">Intentional QA surface</p>
-              <h2>Scanner playground</h2>
-              <p>
-                The blocks below intentionally include common accessibility mistakes so widget behavior can be tested
-                against realistic page structure.
-              </p>
-
-              <div className="problem-grid">
-                <section className="problem-card">
-                  <h4>Skipped heading level</h4>
-                  <p>This card jumps from the section heading to an `h4`, which should register as a heading-order warning.</p>
-                </section>
-
-                <section className="problem-card">
-                  <img className="audit-image" src={AUDIT_ART} />
-                  <p className="note-text">This image intentionally has no `alt` attribute so the image audit can flag it.</p>
-                </section>
-
-                <section className="problem-card">
-                  <input type="text" placeholder="Unlabeled sandbox input" />
-                  <div className="sandbox-actions">
-                    <button type="button" className="icon-only">
-                      <span className="plus-mark" aria-hidden="true" />
-                    </button>
-                    <a href="#footer" className="empty-link">
-                      <span aria-hidden="true" />
-                    </a>
-                    <a href="#footer" className="tiny-target">go</a>
-                  </div>
-                </section>
-
-                <section className="problem-card">
-                  <p className="low-contrast">This line intentionally uses poor contrast to demonstrate the contrast rule.</p>
-                  <iframe srcDoc={IFRAME_DOC} />
-                </section>
-              </div>
-            </article>
-
-            <aside className="tips-card">
-              <h3>Suggested manual test loop</h3>
-              <ol>
-                <li>Open the widget and try the Seizure Safe and Light Sensitivity profiles to confirm motion, glare, and imagery changes.</li>
-                <li>Cycle font size, line height, and letter spacing over the long-form copy.</li>
-                <li>Switch to the Vision Impaired and Cognitive Disability profiles and inspect text scaling, contrast, and highlights across header, main, sections, aside, and footer.</li>
-                <li>Use Text Magnifier, Reading Lens, Big Cursor, Reading Mask, and Reading Guide over the table and form labels.</li>
-              </ol>
-            </aside>
-          </section>
-        </main>
-
-        <footer id="footer" className="site-footer reveal">
-          <p>Built for local QA under the `firefam` organization.</p>
-          <a href="https://github.com/firefam/react-accessibility-widget">github.com/firefam/react-accessibility-widget</a>
+        <footer className="content-footer">
+          <span>Built under the firefam organization.</span>
+          <a href={REPO} target="_blank" rel="noreferrer">{REPO.replace('https://', '')}</a>
         </footer>
-      </div>
+      </main>
 
       <AccessibilityWidget
         title={widgetTitle}
         accentColor={accentColor}
         position={position}
+        offsetX={offsetX}
+        offsetY={offsetY}
         size={size}
-        lang={lang}
-        colorScheme={colorScheme}
-        triggerScheme={triggerScheme}
         theme={widgetTheme}
       />
-    </>
+    </div>
   )
 }
