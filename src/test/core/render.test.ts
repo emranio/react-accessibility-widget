@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { renderPanel } from '../core/render'
-import { DEFAULT_STATE } from '../core/types'
-
-function freshState() {
-  return { ...DEFAULT_STATE }
-}
+import { renderPanel } from '../../core/render'
+import { freshState } from '../helpers'
 
 describe('renderPanel', () => {
   it('returns a non-empty HTML string', () => {
@@ -30,8 +26,8 @@ describe('renderPanel', () => {
   it('renders all 7 profile cards', () => {
     const html = renderPanel(freshState(), 'S')
     const profiles = [
-      'seizure-safe', 'vision-impaired', 'adhd-friendly', 'cognitive-disability',
-      'keyboard-navigation', 'color-blind', 'dyslexia',
+      'seizure-safe', 'vision-impaired', 'light-sensitivity', 'color-blind',
+      'dyslexia', 'adhd-friendly', 'cognitive-disability',
     ]
     for (const id of profiles) {
       expect(html, `missing profile: ${id}`).toContain(`data-profile="${id}"`)

@@ -1,3 +1,9 @@
+/**
+ * Keyboard accessibility helpers: focus trapping for the modal panel and the
+ * page-structure dialog (Tab cycling + Escape to dismiss).
+ */
+
+/** Selector matching the elements considered focusable inside a trap. */
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -8,12 +14,17 @@ const FOCUSABLE = [
 ].join(', ')
 
 let trapHandler: ((e: KeyboardEvent) => void) | null = null
-let triggerEl: HTMLElement | null = null
 let trappedEl: HTMLElement | null = null
 
+/**
+ * Trap keyboard focus within `panel`.
+ *
+ * Tab/Shift+Tab wrap around the focusable elements; Escape invokes `onEscape`
+ * if provided, otherwise clicks and refocuses `trigger`. Focus is moved to the
+ * first focusable element. Replaces any previously active trap.
+ */
 export function trapFocus(panel: HTMLElement, trigger: HTMLElement, onEscape?: () => void): void {
   releaseFocus()
-  triggerEl = trigger
   trappedEl = panel
 
   trapHandler = (e: KeyboardEvent) => {
@@ -57,32 +68,9 @@ export function trapFocus(panel: HTMLElement, trigger: HTMLElement, onEscape?: (
   first?.focus()
 }
 
+/** Remove the active focus trap, if any. Safe to call when none is active. */
 export function releaseFocus(): void {
   if (trapHandler && trappedEl) trappedEl.removeEventListener('keydown', trapHandler)
   trapHandler = null
-  triggerEl = null
   trappedEl = null
-}
-
-const SKIP_LINK_ID = 'accessibility-widget-skip-link'
-
-export function injectSkipLink(): void {
-  if (document.getElementById(SKIP_LINK_ID)) return
-
-  // Only inject if there's a main landmark to skip to
-  const main = document.querySelector('main, [role="main"], #main, #content, #main-content')
-  if (!main) return
-
-  if (!main.id) main.id = 'accessibility-widget-main-content'
-
-  const link = document.createElement('a')
-  link.id = SKIP_LINK_ID
-  link.href = `#${main.id}`
-  link.textContent = 'Skip to main content'
-  link.className = 'accessibility-widget-skip-link'
-  document.body.insertBefore(link, document.body.firstChild)
-}
-
-export function removeSkipLink(): void {
-  document.getElementById(SKIP_LINK_ID)?.remove()
 }

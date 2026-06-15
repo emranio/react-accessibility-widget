@@ -1,11 +1,21 @@
-import { ICONS } from './icons'
-import type { PageStructureData, PageStructureItem, PageStructureTab } from './types'
-import type { Translations } from './i18n'
+/**
+ * Page-structure collection.
+ *
+ * Walks the host page to build a navigable inventory of headings, landmarks,
+ * and links for the Page Structure dialog. Each collected element is tagged
+ * with a stable id so the widget can scroll to and focus it on activation.
+ */
+import type { Translations } from '../i18n'
+import type { PageStructureData, PageStructureItem } from '../types'
 
+/** Attribute used to mark and later locate a jump target on the host page. */
 const STRUCTURE_TARGET_ATTR = 'data-accessibility-widget-structure-id'
+/** Upper bound on items collected per tab, to keep the dialog responsive. */
 const MAX_ITEMS = 80
+/** Monotonic counter backing the generated target ids. */
 let structureTargetId = 0
 
+/** Elements (by tag or ARIA role) treated as navigable landmarks. */
 const LANDMARK_SELECTOR = [
   'header',
   'nav',
@@ -26,14 +36,7 @@ const LANDMARK_SELECTOR = [
   '[role="article"]',
 ].join(',')
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
+/** Get an existing target id for an element, or assign a fresh one. */
 function targetIdFor(el: Element): string {
   const existing = el.getAttribute(STRUCTURE_TARGET_ATTR)
   if (existing) return existing
@@ -42,14 +45,17 @@ function targetIdFor(el: Element): string {
   return id
 }
 
+/** The scope to scan: the host wrapper if present, otherwise the body. */
 function pageRoot(): HTMLElement {
   return document.getElementById('accessibility-widget-host') ?? document.body
 }
 
+/** True when an element lives inside the widget UI or other ignored content. */
 function isIgnored(el: Element): boolean {
   return Boolean(el.closest('.accessibility-widget-root, script, style, template, [hidden], [aria-hidden="true"]'))
 }
 
+/** True when an element is rendered (not display:none / visibility:hidden / ignored). */
 function isVisible(el: Element): boolean {
   if (!(el instanceof HTMLElement)) return false
   if (isIgnored(el)) return false
@@ -57,29 +63,35 @@ function isVisible(el: Element): boolean {
   return style.display !== 'none' && style.visibility !== 'hidden'
 }
 
+/** Collapse whitespace and trim. */
 function cleanText(value: string | null | undefined): string {
   return (value ?? '').replace(/\s+/g, ' ').trim()
 }
 
+/** Resolve the text referenced by an `aria-labelledby` attribute. */
 function labelledByText(el: Element): string {
   const ids = cleanText(el.getAttribute('aria-labelledby')).split(' ').filter(Boolean)
   return ids.map(id => cleanText(document.getElementById(id)?.textContent)).filter(Boolean).join(' ')
 }
 
+/** Compute an element's accessible name from aria-label / labelledby / title. */
 function accessibleName(el: Element): string {
   return cleanText(el.getAttribute('aria-label')) ||
     labelledByText(el) ||
     cleanText(el.getAttribute('title'))
 }
 
+/** Accessible name with a fallback to the element's text content. */
 function elementText(el: Element): string {
   return accessibleName(el) || cleanText(el.textContent)
 }
 
+/** Best label for a link: accessible name, then href, then a fallback. */
 function linkLabel(el: HTMLAnchorElement, fallback: string): string {
   return elementText(el) || cleanText(el.href) || fallback
 }
 
+/** Human-readable kind for a landmark, derived from its role or tag name. */
 function landmarkKind(el: Element): string {
   const role = cleanText(el.getAttribute('role')).toLowerCase()
   if (role === 'banner') return 'Header'
@@ -100,16 +112,19 @@ function landmarkKind(el: Element): string {
   return tag.charAt(0).toUpperCase() + tag.slice(1)
 }
 
+/** Text of the first heading inside an element, if any. */
 function firstHeadingText(el: Element): string {
   return cleanText(el.querySelector('h1,h2,h3,h4,h5,h6')?.textContent)
 }
 
+/** Label for a landmark: `Kind: Name` when a name is available. */
 function landmarkLabel(el: Element): string {
   const kind = landmarkKind(el)
   const name = accessibleName(el) || firstHeadingText(el)
   return name ? `${kind}: ${name}` : kind
 }
 
+/** Nesting depth of a landmark relative to the page root (clamped to 5). */
 function landmarkDepth(el: Element, root: HTMLElement): number {
   let depth = 0
   let parent = el.parentElement
@@ -120,6 +135,7 @@ function landmarkDepth(el: Element, root: HTMLElement): number {
   return Math.min(depth, 5)
 }
 
+/** True when an anchor points to another origin or opens in a new tab. */
 function isExternalLink(anchor: HTMLAnchorElement): boolean {
   if (anchor.target === '_blank') return true
   try {
@@ -129,6 +145,10 @@ function isExternalLink(anchor: HTMLAnchorElement): boolean {
   }
 }
 
+/**
+ * Collect the page's headings, landmarks, and links into a structured,
+ * render-ready inventory. Returns empty lists when there is no document (SSR).
+ */
 export function collectPageStructure(t: Translations): PageStructureData {
   if (typeof document === 'undefined') {
     return { headings: [], landmarks: [], links: [] }
@@ -169,70 +189,4 @@ export function collectPageStructure(t: Translations): PageStructureData {
     }))
 
   return { headings, landmarks, links }
-}
-
-function tabLabel(tab: PageStructureTab, t: Translations): string {
-  if (tab === 'landmarks') return t.structureLandmarks
-  if (tab === 'links') return t.structureLinks
-  return t.structureHeadings
-}
-
-function renderTabs(activeTab: PageStructureTab, t: Translations): string {
-  const tabs: PageStructureTab[] = ['headings', 'landmarks', 'links']
-  return `
-    <div class="accessibility-widget-structure-tabs" role="tablist" aria-label="${escapeHtml(t.pageStructure)}">
-      ${tabs.map(tab => `
-        <button type="button" class="accessibility-widget-structure-tab" role="tab" data-structure-tab="${tab}" aria-selected="${activeTab === tab}">
-          ${escapeHtml(tabLabel(tab, t))}
-        </button>
-      `).join('')}
-    </div>
-  `
-}
-
-function renderBadge(tab: PageStructureTab, item: PageStructureItem): string {
-  if (tab === 'headings') {
-    return `<span class="accessibility-widget-structure-badge accessibility-widget-structure-badge--text">${escapeHtml(item.meta)}</span>`
-  }
-  const icon = tab === 'links' ? ICONS.structureLink : ICONS.structureLandmark
-  return `<span class="accessibility-widget-structure-badge">${icon}</span>`
-}
-
-function renderItems(items: PageStructureItem[], activeTab: PageStructureTab, t: Translations): string {
-  if (items.length === 0) {
-    return `<div class="accessibility-widget-structure-empty">${escapeHtml(t.noStructureItems)}</div>`
-  }
-
-  return items.map(item => `
-    <button type="button" class="accessibility-widget-structure-item" data-structure-target="${escapeHtml(item.id)}" style="--accessibility-widget-structure-depth:${item.depth ?? 0}">
-      ${renderBadge(activeTab, item)}
-      <span class="accessibility-widget-structure-item-label">${escapeHtml(item.label)}</span>
-      ${item.external ? `<span class="accessibility-widget-structure-external">${ICONS.structureExternal}</span>` : ''}
-    </button>
-  `).join('')
-}
-
-export function renderPageStructureDialog(
-  data: PageStructureData,
-  activeTab: PageStructureTab,
-  t: Translations,
-  lang: string,
-): string {
-  const dir = lang === 'ar' ? ' dir="rtl"' : ''
-  const items = data[activeTab]
-
-  return `
-    <div class="accessibility-widget-structure-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t.pageStructure)}"${dir}>
-      <div class="accessibility-widget-structure-header">
-        <h2>${escapeHtml(t.pageStructure)}</h2>
-        <button type="button" class="accessibility-widget-structure-close" data-structure-action="close" aria-label="${escapeHtml(t.close)}">
-          ${ICONS.close}
-        </button>
-      </div>
-      ${renderTabs(activeTab, t)}
-      <div class="accessibility-widget-structure-list" role="tabpanel" aria-label="${escapeHtml(tabLabel(activeTab, t))}">
-        ${renderItems(items, activeTab, t)}
-      </div>
-    </div>
-  `
 }

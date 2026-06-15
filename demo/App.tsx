@@ -28,8 +28,8 @@ const METRICS = [
 
 const FEATURE_CARDS = [
   {
-    title: 'Keyboard-first review',
-    body: 'Turn on Keyboard Navigation to inject a skip link and stronger focus rings across the page.',
+    title: 'Light-sensitive reading',
+    body: 'Switch on Light Sensitivity for a low-glare dark scheme with motion and bright imagery removed.',
   },
   {
     title: 'Structured page testing',
@@ -248,7 +248,7 @@ export default function App() {
                 </div>
                 <div>
                   <dt>Best first check</dt>
-                  <dd>Open the widget, try Keyboard Navigation, then test the reading aids over dense content.</dd>
+                  <dd>Open the widget, try Seizure Safe or Light Sensitivity, then test the reading aids over dense content.</dd>
                 </div>
               </dl>
             </aside>
@@ -278,7 +278,7 @@ export default function App() {
               </blockquote>
               <p>
                 The demo also includes links, buttons, tables, form fields, summary elements, and multiple landmarks so the
-                keyboard and visual adjustment tools can be tested in context.
+                visual and reading adjustment tools can be tested in context.
               </p>
 
               <details>
@@ -414,9 +414,9 @@ export default function App() {
             <aside className="tips-card">
               <h3>Suggested manual test loop</h3>
               <ol>
-                <li>Open the widget and enable Keyboard Navigation to confirm focus rings and the skip link.</li>
+                <li>Open the widget and try the Seizure Safe and Light Sensitivity profiles to confirm motion, glare, and imagery changes.</li>
                 <li>Cycle font size, line height, and letter spacing over the long-form copy.</li>
-                <li>Switch to Keyboard Navigation mode and inspect focus targets across header, main, sections, aside, and footer.</li>
+                <li>Switch to the Vision Impaired and Cognitive Disability profiles and inspect text scaling, contrast, and highlights across header, main, sections, aside, and footer.</li>
                 <li>Use Text Magnifier, Reading Lens, Big Cursor, Reading Mask, and Reading Guide over the table and form labels.</li>
               </ol>
             </aside>

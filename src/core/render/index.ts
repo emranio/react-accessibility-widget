@@ -1,96 +1,25 @@
-import { ICONS } from './icons'
-import { getTranslations } from './i18n'
-import { TEXT_ALIGNMENT_MAX_LEVEL, TOOL_MAX_LEVELS, type LevelToolKey } from './tool-levels'
-import type { AccessibilityProfile, AccessibilityWidgetState, Lang, TextAlignment, WidgetSize } from './types'
-
-function sizeSwitch(active: WidgetSize, label: string): string {
-  const isXl = active === 'XL'
-  const nextSize: WidgetSize = isXl ? 'S' : 'XL'
-  return `
-    <button type="button" class="accessibility-widget-size-switch" role="switch" data-size="${nextSize}" aria-checked="${isXl}" aria-label="${label}">
-      <span class="accessibility-widget-size-switch-track" aria-hidden="true">
-        <span class="accessibility-widget-size-switch-option accessibility-widget-size-switch-option--s">S</span>
-        <span class="accessibility-widget-size-switch-option accessibility-widget-size-switch-option--l">L</span>
-        <span class="accessibility-widget-size-switch-thumb"></span>
-      </span>
-    </button>
-  `
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-function profileCard(id: AccessibilityProfile, label: string, icon: string, active: boolean): string {
-  return `
-    <button class="accessibility-widget-card" type="button" data-profile="${id}" aria-pressed="${active}">
-      <span class="icon">${icon}</span>
-      <span class="label">${label}</span>
-    </button>
-  `
-}
-
-function levelBars(level: number, maxLevel: number): string {
-  if (maxLevel <= 1) return ''
-  return `
-    <div class="accessibility-widget-levels" aria-hidden="true">
-      ${Array.from({ length: maxLevel }, (_, index) => `
-        <span class="accessibility-widget-level${index + 1 === level ? ' active' : ''}"></span>
-      `).join('')}
-    </div>
-  `
-}
-
-function toolTile(opts: {
-  key: string; icon: string; label: string; level: number; maxLevel: number
-}): string {
-  const { key, icon, label, level, maxLevel } = opts
-  const ariaLevel = maxLevel <= 1
-    ? (level > 0 ? 'On' : 'Off')
-    : (level > 0 ? `Level ${level} of ${maxLevel}` : 'Off')
-  return `
-    <button class="accessibility-widget-tile" type="button" data-tool="${key}" data-level="${level}" data-max-level="${maxLevel}" aria-pressed="${level > 0}" aria-label="${label}, ${ariaLevel}">
-      <span class="icon">${icon}</span>
-      <span class="label">${label}</span>
-      ${levelBars(level, maxLevel)}
-    </button>
-  `
-}
-
-function adjustmentTile(state: AccessibilityWidgetState, key: LevelToolKey, icon: string, label: string): string {
-  return toolTile({ key, icon, label, level: state[key] as number, maxLevel: TOOL_MAX_LEVELS[key] })
-}
-
-function legibleFontsTile(state: AccessibilityWidgetState, t: ReturnType<typeof getTranslations>): string {
-  const isDyslexiaFriendly = state.legibleFonts === 1
-  return adjustmentTile(
-    state,
-    'legibleFonts',
-    isDyslexiaFriendly ? ICONS.dyslexiaFriendlyFont : ICONS.legibleFonts,
-    isDyslexiaFriendly ? t.dyslexiaFriendly : t.legibleFonts,
-  )
-}
-
-function alignmentLevel(active: TextAlignment): number {
-  if (active === 'left') return 1
-  if (active === 'center') return 2
-  if (active === 'right') return 3
-  if (active === 'justify') return 4
-  return 0
-}
-
-function alignmentIcon(active: TextAlignment): string {
-  if (active === 'center') return ICONS.textAlignCenter
-  if (active === 'right') return ICONS.textAlignRight
-  if (active === 'justify') return ICONS.textAlignJustify
-  return ICONS.textAlignLeft
-}
-
+/**
+ * Panel renderer.
+ *
+ * {@link renderPanel} produces the full inner HTML for the settings panel from
+ * the current state. The widget assigns this string to the panel's `innerHTML`
+ * on every state change; click handling is delegated by the widget via the
+ * `data-*` attributes embedded here.
+ */
+import { ICONS } from '../icons'
+import { getTranslations } from '../i18n'
+import { TEXT_ALIGNMENT_MAX_LEVEL } from '../tool-levels'
+import type { AccessibilityProfile, AccessibilityWidgetState, Lang, WidgetSize } from '../types'
+import { escapeHtml } from '../utils/html'
+import {
+  adjustmentTile,
+  alignmentIcon,
+  alignmentLevel,
+  legibleFontsTile,
+  profileCard,
+  sizeSwitch,
+  toolTile,
+} from './tiles'
 
 export function renderPanel(
   state: AccessibilityWidgetState,
@@ -104,13 +33,14 @@ export function renderPanel(
   const PROFILES: Array<{ id: AccessibilityProfile; label: string; icon: string }> = [
     { id: 'seizure-safe',         label: t.seizureSafe,         icon: ICONS.seizure },
     { id: 'vision-impaired',      label: t.visionImpaired,      icon: ICONS.vision },
-    { id: 'adhd-friendly',        label: t.adhdFriendly,        icon: ICONS.adhd },
-    { id: 'cognitive-disability', label: t.cognitiveDisability,  icon: ICONS.cognitive },
-    { id: 'keyboard-navigation',  label: t.keyboardNavigation,  icon: ICONS.keyboard },
+    { id: 'light-sensitivity',    label: t.lightSensitivity,    icon: ICONS.lightSensitivity },
     { id: 'color-blind',          label: t.colorBlind,          icon: ICONS.colorBlind },
     { id: 'dyslexia',             label: t.dyslexia,            icon: ICONS.dyslexia },
+    { id: 'adhd-friendly',        label: t.adhdFriendly,        icon: ICONS.adhd },
+    { id: 'cognitive-disability', label: t.cognitiveDisability, icon: ICONS.cognitive },
   ]
 
+  // Arabic is the only RTL language currently bundled.
   const dir = lang === 'ar' ? ' dir="rtl"' : ''
 
   return `

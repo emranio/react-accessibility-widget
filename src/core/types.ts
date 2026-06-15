@@ -1,23 +1,41 @@
+/**
+ * Shared types and default state for the accessibility widget.
+ *
+ * This module is the canonical home for the public configuration / state
+ * shapes and the {@link DEFAULT_STATE} baseline. It has no runtime dependencies
+ * so it can be imported from anywhere in the core without cycles.
+ */
+
+/** Panel size preset. */
 export type WidgetSize = 'S' | 'XL'
+/** Corner the trigger and panel anchor to. */
 export type Position = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
+/** Text-alignment value (`'default'` means "no override"). */
 export type TextAlignment = 'left' | 'center' | 'right' | 'justify' | 'default'
+/** A tool's current level; 0 means off. */
 export type AdjustmentLevel = 0 | 1 | 2 | 3 | 4
+/** Active tab in the Page Structure dialog. */
 export type PageStructureTab = 'headings' | 'landmarks' | 'links'
 
+/** A bundled accessibility profile. */
 export type AccessibilityProfile =
   | 'seizure-safe'
   | 'vision-impaired'
-  | 'adhd-friendly'
-  | 'cognitive-disability'
-  | 'keyboard-navigation'
+  | 'light-sensitivity'
   | 'color-blind'
   | 'dyslexia'
+  | 'adhd-friendly'
+  | 'cognitive-disability'
 
+/** Widget colour scheme. */
 export type ColorScheme = 'light' | 'dark'
+/** Supported UI languages (Arabic renders right-to-left). */
 export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
 
+/** Trigger button colour preset. */
 export type TriggerScheme = 'auto' | 'dark' | 'light'
 
+/** Configuration accepted by the widget constructor and React props. */
 export interface AccessibilityWidgetConfig {
   title?: string
   accentColor?: string
@@ -43,6 +61,7 @@ export interface AccessibilityWidgetConfig {
   onReset?: () => void
 }
 
+/** The complete, persisted runtime state of the widget. */
 export interface AccessibilityWidgetState {
   profile: AccessibilityProfile | null
   fontSize: AdjustmentLevel
@@ -67,6 +86,7 @@ export interface AccessibilityWidgetState {
   offAnimations: AdjustmentLevel
 }
 
+/** A single navigable entry (heading, landmark, or link) in the dialog. */
 export interface PageStructureItem {
   id: string
   label: string
@@ -75,12 +95,14 @@ export interface PageStructureItem {
   external?: boolean
 }
 
+/** The collected page structure, grouped by tab. */
 export interface PageStructureData {
   headings: PageStructureItem[]
   landmarks: PageStructureItem[]
   links: PageStructureItem[]
 }
 
+/** The baseline state: no profile and every tool off. */
 export const DEFAULT_STATE: AccessibilityWidgetState = {
   profile: null,
   fontSize: 0,
@@ -105,4 +127,5 @@ export const DEFAULT_STATE: AccessibilityWidgetState = {
   offAnimations: 0,
 }
 
+/** `localStorage` key under which widget state is persisted. */
 export const STORAGE_KEY = 'react-accessibility-widget-state'

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_STATE, STORAGE_KEY } from '../core/types'
+import { DEFAULT_STATE, STORAGE_KEY } from '../../core/types'
 
 describe('DEFAULT_STATE', () => {
   it('has null profile', () => {

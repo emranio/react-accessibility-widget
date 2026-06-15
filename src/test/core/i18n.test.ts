@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getTranslations } from '../core/i18n'
+import { getTranslations } from '../../core/i18n'
 
 describe('getTranslations', () => {
   it('returns English by default', () => {
