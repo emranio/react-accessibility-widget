@@ -47,9 +47,21 @@ const PANEL_SECTION_IDS: PanelSectionId[] = ['settings', 'profiles', 'content', 
 
 type NormalizedWidgetSize = 'S' | 'L'
 
+type ScrollSnapshot = {
+  panelBodyLeft: number
+  panelBodyTop: number
+  windowX: number
+  windowY: number
+}
+
 /** Coerce an arbitrary size value to a supported {@link WidgetSize}. */
 function normalizeSize(size: unknown): NormalizedWidgetSize {
   return typeof size === 'string' && size.toUpperCase() === 'L' ? 'L' : 'S'
+}
+
+/** Escape a simple data-attribute value for use in a CSS selector. */
+function selectorValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 }
 
 /** Normalize the public side-only position value. */
@@ -223,12 +235,14 @@ export class AccessibilityWidget {
 
   /** Reset all settings to defaults, persist, and re-apply effects. */
   reset(): void {
+    const scroll = this.captureScrollPosition()
+    const focus = this.capturePanelFocusSelector()
     this.pageStructureOpen = false
     this.state = { ...DEFAULT_STATE }
     this.persist()
     applyEffects(this.state)
     this.config.onReset?.()
-    this.update()
+    this.update(scroll, focus)
   }
 
   // ── Public accessors ───────────────────────────────────────────────────
@@ -520,9 +534,11 @@ export class AccessibilityWidget {
 
   /** Persist, apply effects, and re-render after a state change. */
   private commit(): void {
+    const scroll = this.captureScrollPosition()
+    const focus = this.capturePanelFocusSelector()
     this.persist()
     applyEffects(this.state)
-    this.update()
+    this.update(scroll, focus)
   }
 
   private persist(): void {
@@ -531,21 +547,105 @@ export class AccessibilityWidget {
 
   // ── Rendering ──────────────────────────────────────────────────────────
 
-  private update(): void {
+  private update(
+    scroll = this.captureScrollPosition(),
+    focusSelector = this.capturePanelFocusSelector(),
+  ): void {
     if (!this.panel) return
     this.updateWidgetLabels()
     this.panel.classList.toggle('open', this.isOpen)
     this.overlay?.classList.toggle('open', this.isOpen)
-    const prevScroll = this.panel.querySelector<HTMLElement>('.accessibility-widget-body')?.scrollTop ?? 0
     this.panel.innerHTML = renderPanel(this.state, this.size, this.lang, {
       pageStructureOpen: this.pageStructureOpen,
       title: this.getTitle(),
       position: this.config.position!,
       collapsedSections: this.collapsedSections,
     })
-    const nextBody = this.panel.querySelector<HTMLElement>('.accessibility-widget-body')
-    if (nextBody) nextBody.scrollTop = prevScroll
     this.renderStructureDialog()
+    this.restorePanelFocus(focusSelector)
+    this.restoreScrollPosition(scroll)
+  }
+
+  private captureScrollPosition(): ScrollSnapshot {
+    const body = this.panel?.querySelector<HTMLElement>('.accessibility-widget-body-container')
+    return {
+      panelBodyLeft: body?.scrollLeft ?? 0,
+      panelBodyTop: body?.scrollTop ?? 0,
+      windowX: typeof window === 'undefined' ? 0 : window.scrollX,
+      windowY: typeof window === 'undefined' ? 0 : window.scrollY,
+    }
+  }
+
+  private restoreScrollPosition(scroll: ScrollSnapshot): void {
+    const restore = () => {
+      const body = this.panel?.querySelector<HTMLElement>('.accessibility-widget-body-container')
+      if (body) {
+        body.scrollLeft = scroll.panelBodyLeft
+        body.scrollTop = scroll.panelBodyTop
+      }
+      this.restoreWindowScroll(scroll.windowX, scroll.windowY)
+    }
+    restore()
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(restore)
+    }
+  }
+
+  private restoreWindowScroll(x: number, y: number): void {
+    if (typeof window === 'undefined') return
+    const currentX = window.scrollX
+    const currentY = window.scrollY
+    if (currentX === x && currentY === y) return
+    if (typeof window.scrollTo === 'function') {
+      try {
+        window.scrollTo(x, y)
+        return
+      } catch {
+        // jsdom does not implement window.scrollTo; fall back below.
+      }
+    }
+    const scroller = document.scrollingElement as HTMLElement | null
+    if (scroller) {
+      scroller.scrollLeft = x
+      scroller.scrollTop = y
+    }
+  }
+
+  private capturePanelFocusSelector(): string | null {
+    if (!this.panel || typeof document === 'undefined') return null
+    const active = document.activeElement
+    if (!(active instanceof HTMLElement) || !this.panel.contains(active)) return null
+
+    const tool = active.closest<HTMLElement>('[data-tool]')
+    if (tool && this.panel.contains(tool) && tool.dataset.tool) return `[data-tool="${selectorValue(tool.dataset.tool)}"]`
+
+    const profile = active.closest<HTMLElement>('[data-profile]')
+    if (profile && this.panel.contains(profile) && profile.dataset.profile) return `[data-profile="${selectorValue(profile.dataset.profile)}"]`
+
+    const section = active.closest<HTMLElement>('[data-section-toggle]')
+    if (section && this.panel.contains(section) && section.dataset.sectionToggle) return `[data-section-toggle="${selectorValue(section.dataset.sectionToggle)}"]`
+
+    const position = active.closest<HTMLElement>('.accessibility-widget-position-option[data-position]')
+    if (position && this.panel.contains(position) && position.dataset.position) return `.accessibility-widget-position-option[data-position="${selectorValue(position.dataset.position)}"]`
+
+    if (active.classList.contains('accessibility-widget-size-switch')) return '.accessibility-widget-size-switch'
+    if (active.classList.contains('accessibility-widget-close')) return '.accessibility-widget-close'
+
+    const action = active.closest<HTMLElement>('[data-action]')
+    if (action && this.panel.contains(action) && action.dataset.action) return `[data-action="${selectorValue(action.dataset.action)}"]`
+
+    return null
+  }
+
+  private restorePanelFocus(selector: string | null): void {
+    if (!selector || !this.isOpen || !this.panel) return
+    const target = this.panel.querySelector<HTMLElement>(selector)
+    if (!target) return
+    try {
+      target.focus({ preventScroll: true })
+    } catch {
+      target.focus()
+    }
   }
 
   private renderStructureDialog(): void {

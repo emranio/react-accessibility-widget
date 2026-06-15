@@ -174,6 +174,24 @@ describe('Accessibility Widget — panel click interactions', () => {
     a.destroy()
   })
 
+  it('preserves panel scroll and focused tool after a tool click re-renders', () => {
+    const a = new AccessibilityWidget()
+    a.mount()
+    a.open()
+
+    const body = document.querySelector<HTMLElement>('.accessibility-widget-body')!
+    body.scrollTop = 180
+    const tile = document.querySelector<HTMLButtonElement>('.accessibility-widget-panel [data-tool="fontSize"]')!
+    tile.focus()
+    tile.click()
+
+    const nextBody = document.querySelector<HTMLElement>('.accessibility-widget-body')!
+    const nextTile = document.querySelector<HTMLButtonElement>('.accessibility-widget-panel [data-tool="fontSize"]')!
+    expect(nextBody.scrollTop).toBe(180)
+    expect(document.activeElement).toBe(nextTile)
+    a.destroy()
+  })
+
   it('new visual reading tools advance as level-based controls', () => {
     const a = new AccessibilityWidget()
     a.mount()
