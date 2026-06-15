@@ -170,8 +170,9 @@ export const layout = `
   margin-right: 7px;
 }
 .accessibility-widget-icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
   border-radius: 999px;
   background: #ffffff;
   border: 1px solid color-mix(in srgb, var(--accessibility-widget-primary) 10%, #ffffff);
@@ -196,11 +197,18 @@ export const layout = `
 /* ── Body ── */
 .accessibility-widget-body {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 12px 10px;
+  overflow: hidden;
+  margin: 0 12px 10px;
   background: var(--accessibility-widget-panel-bg);
   min-width: 0;
+  border-radius: 8px;
+}
+
+.accessibility-widget-body-container{
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .accessibility-widget-body::-webkit-scrollbar { width: 7px; }
 .accessibility-widget-body::-webkit-scrollbar-track { background: transparent; }

@@ -4,9 +4,9 @@ import type { Translations } from '../types'
 export const en: Translations = {
   title: 'React Accessibility Widget',
   subtitle: 'Accessibility Settings',
-  widgetSettings: 'Widget settings',
-  widgetSize: 'Widget Size',
-  widgetPosition: 'Widget Position',
+  widgetSettings: 'Settings',
+  widgetSize: 'UI Size',
+  widgetPosition: 'UI Position',
   smallSize: 'Small',
   largeSize: 'Large',
   leftPosition: 'Left',

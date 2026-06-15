@@ -23,15 +23,15 @@ const FEATURES: Array<{ icon: keyof typeof GLYPHS; title: string; body: string }
   { icon: 'type', title: '8 Content Tools', body: 'Legible fonts, title/link highlighting, font size, text magnifier, line height, letter spacing, and text alignment.' },
   { icon: 'color', title: '6 Color Tools', body: 'Dark, light, and high contrast, plus monochrome, invert colors, and a color-blind visual filter.' },
   { icon: 'reading', title: '7 Visibility Tools', body: 'Reading lens, big cursor, reading mask, reading guide, page structure, hide media, and reduce animations.' },
-  { icon: 'i18n', title: 'Keyboard + i18n', body: 'Ctrl+U toggles the panel, with six bundled languages and right-to-left Arabic support.' },
-  { icon: 'theme', title: 'Themeable Settings', body: 'Configure title, accent color, panel size, side position, trigger offsets, and theme tokens.' },
+  { icon: 'keyboard', title: 'Keyboard Shortcut', body: 'Ctrl+U opens and closes the widget, with the shortcut shown under the configured widget title.' },
+  { icon: 'theme', title: 'Themeable Settings', body: 'Configure title, accent color, panel size, left/right position, trigger offsets, and theme tokens.' },
 ]
 
 const METRICS = [
   { value: '7', label: 'Profiles' },
   { value: '21', label: 'Tools' },
   { value: '3', label: 'Tool groups' },
-  { value: '6', label: 'Languages' },
+  { value: '2', label: 'Positions' },
 ]
 
 const TABLE_ROWS = [
@@ -47,7 +47,7 @@ const GLYPHS = {
   type: <><path d="M5 18 11 6l6 12" /><path d="M7.5 13.5h7" /></>,
   color: <><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v17" /><path d="M12 12a8.5 8.5 0 0 0 0-8.5" fill="currentColor" stroke="none" /></>,
   reading: <><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="2.6" /></>,
-  i18n: <><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17" /><path d="M12 3.5c2.6 2.4 4 5.4 4 8.5s-1.4 6.1-4 8.5c-2.6-2.4-4-5.4-4-8.5s1.4-6.1 4-8.5Z" /></>,
+  keyboard: <><rect x="3.5" y="6.5" width="17" height="11" rx="2" /><path d="M7 10h.01" /><path d="M10 10h.01" /><path d="M13 10h.01" /><path d="M16 10h.01" /><path d="M7 13.5h5" /><path d="M15 13.5h2" /></>,
   theme: <><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 2-1 2-1.8 0-1.4-1.4-1.6-1.4-2.7 0-.8.7-1.5 1.6-1.5h1.6a4.1 4.1 0 0 0 4.1-4.6C20.7 6 16.8 3.5 12 3.5Z" /><circle cx="8" cy="11" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" /><circle cx="16" cy="11" r="1" fill="currentColor" stroke="none" /></>,
 } as const
 

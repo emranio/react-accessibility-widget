@@ -127,60 +127,60 @@ export function renderPanel(
     </div>
 
     <div class="accessibility-widget-body"${dir}>
+      <div class="accessibility-widget-body-container">
+        ${sectionCard('settings', t.widgetSettings, collapsedSections.settings, `
+          <div class="accessibility-widget-setting-row">
+            <span class="accessibility-widget-setting-label">${t.widgetSize}</span>
+            ${sizeSwitch(size, t.widgetSize, t.smallSize, t.largeSize)}
+          </div>
+          <div class="accessibility-widget-setting-row accessibility-widget-setting-row--stack">
+            <span class="accessibility-widget-setting-label">${t.widgetPosition}</span>
+            ${positionSwitch(position, t.widgetPosition, t.leftPosition, t.rightPosition)}
+          </div>
+        `)}
 
-      ${sectionCard('settings', t.widgetSettings, collapsedSections.settings, `
-        <div class="accessibility-widget-setting-row">
-          <span class="accessibility-widget-setting-label">${t.widgetSize}</span>
-          ${sizeSwitch(size, t.widgetSize, t.smallSize, t.largeSize)}
-        </div>
-        <div class="accessibility-widget-setting-row accessibility-widget-setting-row--stack">
-          <span class="accessibility-widget-setting-label">${t.widgetPosition}</span>
-          ${positionSwitch(position, t.widgetPosition, t.leftPosition, t.rightPosition)}
-        </div>
-      `)}
+        ${sectionCard('profiles', t.profiles, collapsedSections.profiles, `
+          <div class="accessibility-widget-grid">
+            ${PROFILES.map(p => profileCard(p.id, p.label, p.icon, state.profile === p.id, PROFILE_TOOLTIPS[p.id])).join('')}
+          </div>
+        `)}
 
-      ${sectionCard('profiles', t.profiles, collapsedSections.profiles, `
-        <div class="accessibility-widget-grid">
-          ${PROFILES.map(p => profileCard(p.id, p.label, p.icon, state.profile === p.id, PROFILE_TOOLTIPS[p.id])).join('')}
-        </div>
-      `)}
+        ${sectionCard('content', t.contentAdjustments, collapsedSections.content, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts)}
+            ${adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles)}
+            ${adjustmentTile(state, 'fontSize',        ICONS.fontSizing,     t.fontSize, TOOL_TOOLTIPS.fontSize)}
+            ${adjustmentTile(state, 'textMagnifier',   ICONS.textMagnifier,  t.textMagnifier, TOOL_TOOLTIPS.textMagnifier)}
+            ${adjustmentTile(state, 'highlightLinks',  ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks)}
+            ${adjustmentTile(state, 'lineHeight',      ICONS.lineHeight,     t.lineHeight, TOOL_TOOLTIPS.lineHeight)}
+            ${adjustmentTile(state, 'letterSpacing',   ICONS.letterSpacing,  t.letterSpacing, TOOL_TOOLTIPS.letterSpacing)}
+            ${toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment })}
+          </div>
+        `)}
 
-      ${sectionCard('content', t.contentAdjustments, collapsedSections.content, `
-        <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-          ${legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts)}
-          ${adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles)}
-          ${adjustmentTile(state, 'fontSize',        ICONS.fontSizing,     t.fontSize, TOOL_TOOLTIPS.fontSize)}
-          ${adjustmentTile(state, 'textMagnifier',   ICONS.textMagnifier,  t.textMagnifier, TOOL_TOOLTIPS.textMagnifier)}
-          ${adjustmentTile(state, 'highlightLinks',  ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks)}
-          ${adjustmentTile(state, 'lineHeight',      ICONS.lineHeight,     t.lineHeight, TOOL_TOOLTIPS.lineHeight)}
-          ${adjustmentTile(state, 'letterSpacing',   ICONS.letterSpacing,  t.letterSpacing, TOOL_TOOLTIPS.letterSpacing)}
-          ${toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment })}
-        </div>
-      `)}
+        ${sectionCard('color', t.colorAdjustments, collapsedSections.color, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${adjustmentTile(state, 'darkContrast', ICONS.darkContrast, t.darkContrast, TOOL_TOOLTIPS.darkContrast)}
+            ${adjustmentTile(state, 'lightContrast', ICONS.lightContrast, t.lightContrast, TOOL_TOOLTIPS.lightContrast)}
+            ${adjustmentTile(state, 'highContrast', ICONS.highContrast, t.highContrast, TOOL_TOOLTIPS.highContrast)}
+            ${adjustmentTile(state, 'monochrome', ICONS.monochrome, t.monochrome, TOOL_TOOLTIPS.monochrome)}
+            ${adjustmentTile(state, 'invertColors', ICONS.invertColors, t.invertColors, TOOL_TOOLTIPS.invertColors)}
+            ${adjustmentTile(state, 'colorBlind', ICONS.colorBlindVisual, t.colorBlind, TOOL_TOOLTIPS.colorBlind)}
+          </div>
+        `)}
 
-      ${sectionCard('color', t.colorAdjustments, collapsedSections.color, `
-        <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-          ${adjustmentTile(state, 'darkContrast', ICONS.darkContrast, t.darkContrast, TOOL_TOOLTIPS.darkContrast)}
-          ${adjustmentTile(state, 'lightContrast', ICONS.lightContrast, t.lightContrast, TOOL_TOOLTIPS.lightContrast)}
-          ${adjustmentTile(state, 'highContrast', ICONS.highContrast, t.highContrast, TOOL_TOOLTIPS.highContrast)}
-          ${adjustmentTile(state, 'monochrome', ICONS.monochrome, t.monochrome, TOOL_TOOLTIPS.monochrome)}
-          ${adjustmentTile(state, 'invertColors', ICONS.invertColors, t.invertColors, TOOL_TOOLTIPS.invertColors)}
-          ${adjustmentTile(state, 'colorBlind', ICONS.colorBlindVisual, t.colorBlind, TOOL_TOOLTIPS.colorBlind)}
-        </div>
-      `)}
-
-      ${sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
-        <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-          ${adjustmentTile(state, 'readingLens',     ICONS.readingLens,    t.readingLens, TOOL_TOOLTIPS.readingLens)}
-          ${adjustmentTile(state, 'bigCursor',       ICONS.bigCursor,      t.bigCursor, TOOL_TOOLTIPS.bigCursor)}
-          ${adjustmentTile(state, 'readingMask',     ICONS.readingMask,    t.readingMask, TOOL_TOOLTIPS.readingMask)}
-          ${adjustmentTile(state, 'readingGuide',    ICONS.readingGuide,   t.readingGuide, TOOL_TOOLTIPS.readingGuide)}
-          ${toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure })}
-          ${adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages)}
-          ${adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations)}
-        </div>
-      `)}
-
+        ${sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${adjustmentTile(state, 'readingLens',     ICONS.readingLens,    t.readingLens, TOOL_TOOLTIPS.readingLens)}
+            ${adjustmentTile(state, 'bigCursor',       ICONS.bigCursor,      t.bigCursor, TOOL_TOOLTIPS.bigCursor)}
+            ${adjustmentTile(state, 'readingMask',     ICONS.readingMask,    t.readingMask, TOOL_TOOLTIPS.readingMask)}
+            ${adjustmentTile(state, 'readingGuide',    ICONS.readingGuide,   t.readingGuide, TOOL_TOOLTIPS.readingGuide)}
+            ${toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure })}
+            ${adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages)}
+            ${adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations)}
+          </div>
+        `)}
+      </div>
     </div>
 
     <div class="accessibility-widget-reset-bar"${dir}>
