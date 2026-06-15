@@ -209,10 +209,9 @@ export const controls = `
   line-height: 1.35;
   text-align: left;
   white-space: normal;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-2px);
-  transition: opacity 0.16s ease, transform 0.16s ease;
+  display: none;
+  pointer-events: auto;
+  transition: none;
 }
 .accessibility-widget-tooltip::before {
   content: "";
@@ -223,6 +222,14 @@ export const controls = `
   height: 10px;
   background: inherit;
   transform: rotate(45deg);
+}
+.accessibility-widget-grid > :nth-child(odd) .accessibility-widget-tooltip {
+  left: 0;
+  right: auto;
+}
+.accessibility-widget-grid > :nth-child(odd) .accessibility-widget-tooltip::before {
+  left: 7px;
+  right: auto;
 }
 .accessibility-widget-card:hover .accessibility-widget-info,
 .accessibility-widget-card:focus-visible .accessibility-widget-info,
@@ -238,13 +245,8 @@ export const controls = `
   background: color-mix(in srgb, var(--accessibility-widget-on-primary, #ffffff) 18%, transparent);
   color: var(--accessibility-widget-on-primary, #ffffff);
 }
-.accessibility-widget-card:hover .accessibility-widget-tooltip,
-.accessibility-widget-tile:hover .accessibility-widget-tooltip,
-.accessibility-widget-info:hover .accessibility-widget-tooltip,
-.accessibility-widget-card:focus-visible .accessibility-widget-tooltip,
-.accessibility-widget-tile:focus-visible .accessibility-widget-tooltip {
-  opacity: 1;
-  transform: translateY(0);
+.accessibility-widget-info:hover .accessibility-widget-tooltip {
+  display: block;
 }
 
 /* ── Tiles (content & color adjustments) ── */
