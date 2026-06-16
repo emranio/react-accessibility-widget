@@ -60,58 +60,6 @@ describe('Accessibility Widget — branding', () => {
   })
 })
 
-describe('Accessibility Widget — triggerScheme', () => {
-  const TRIGGER_AUTO_BG = 'var(--accessibility-widget-primary)'
-
-  it('explicit triggerScheme="dark" → dark trigger', () => {
-    const a = new AccessibilityWidget({ triggerScheme: 'dark' })
-    a.mount()
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')!
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe('#0c0c0c')
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-icon')).toBe('#ffffff')
-    a.destroy()
-  })
-
-  it('explicit triggerScheme="light" → light trigger', () => {
-    const a = new AccessibilityWidget({ triggerScheme: 'light' })
-    a.mount()
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')!
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe('#ffffff')
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-icon')).toBe('#0c0c0c')
-    a.destroy()
-  })
-
-  it('triggerScheme unset → accent-filled trigger with white icon', () => {
-    const a = new AccessibilityWidget()
-    a.mount()
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')!
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe(TRIGGER_AUTO_BG)
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-icon')).toBe('#ffffff')
-    a.destroy()
-  })
-
-  it('triggerScheme="auto" explicitly → accent-filled', () => {
-    const a = new AccessibilityWidget({ triggerScheme: 'auto' })
-    a.mount()
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')!
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe(TRIGGER_AUTO_BG)
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-icon')).toBe('#ffffff')
-    a.destroy()
-  })
-
-  it('setTriggerScheme updates trigger styling at runtime', () => {
-    const a = new AccessibilityWidget({ triggerScheme: 'light' })
-    a.mount()
-    const root = document.querySelector<HTMLElement>('.accessibility-widget-root')!
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe('#ffffff')
-    a.setTriggerScheme('dark')
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe('#0c0c0c')
-    a.setTriggerScheme('auto')
-    expect(root.style.getPropertyValue('--accessibility-widget-trigger-bg')).toBe(TRIGGER_AUTO_BG)
-    a.destroy()
-  })
-})
-
 describe('Accessibility Widget — readable accent foreground (on-primary)', () => {
   it('sets a light foreground for a dark accent', () => {
     const a = new AccessibilityWidget({ accentColor: '#1d4ed8' })

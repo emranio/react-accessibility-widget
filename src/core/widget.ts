@@ -11,7 +11,8 @@ import { ICONS } from './icons'
 import { translations } from './i18n'
 import { releaseFocus, trapFocus } from './keyboard'
 import { collectPageStructure, renderPageStructureDialog } from './page-structure'
-import { loadState, saveState } from './persistence'
+import { osPreferenceDefaults, readOsPreferences } from './os-preferences'
+import { hasPersistedState, loadState, saveState } from './persistence'
 import { PROFILE_PRESETS } from './profiles'
 import { renderPanel, type PanelSectionId } from './render'
 import { DEFAULT_VARS, STYLE_ID, buildStyles } from './styles'
@@ -26,7 +27,6 @@ import {
   type Position,
   type TextAlignment,
   type ToolKey,
-  type TriggerScheme,
   type WidgetSize,
 } from './types'
 import { setCssVar } from './utils/css'
@@ -44,6 +44,19 @@ const COLOR_EXCLUSIVE: Array<keyof AccessibilityWidgetState> = [
 const ALIGNMENT_LEVELS: TextAlignment[] = ['left', 'center', 'right', 'justify']
 
 const PANEL_SECTION_IDS: PanelSectionId[] = ['settings', 'profiles', 'content', 'color', 'visibility']
+
+/** Human labels for profiles, used in screen-reader announcements. */
+const PROFILE_LABEL: Record<AccessibilityProfile, string> = {
+  'seizure-safe': translations.seizureSafe,
+  'vision-impaired': translations.visionImpaired,
+  'light-sensitivity': translations.lightSensitivity,
+  'color-blind': translations.colorBlind,
+  dyslexia: translations.dyslexia,
+  'adhd-friendly': translations.adhdFriendly,
+  'cognitive-disability': translations.cognitiveDisability,
+  'keyboard-motor': translations.keyboardMotor,
+  'blind-screen-reader': translations.blindScreenReader,
+}
 
 type NormalizedWidgetSize = 'S' | 'L'
 
@@ -112,6 +125,19 @@ export class AccessibilityWidget {
     color: false,
     visibility: false,
   }
+  private liveRegion: HTMLDivElement | null = null
+  private userInteracted = false
+  private motionMql: MediaQueryList | null = null
+  /** When the visitor hasn't interacted, keep Reduce Animations in sync with the OS. */
+  private readonly handleMotionChange = (e: MediaQueryListEvent): void => {
+    if (this.userInteracted || this.state.profile !== null) return
+    const next = (e.matches ? 1 : 0) as AdjustmentLevel
+    if (this.state.offAnimations === next) return
+    this.state = { ...this.state, offAnimations: next }
+    this.persist()
+    applyEffects(this.state)
+    this.update()
+  }
   private readonly shortcutListenerOptions: AddEventListenerOptions = { capture: true }
   private readonly handleGlobalShortcut = (e: KeyboardEvent): void => {
     const key = e.key.toLowerCase()
@@ -131,6 +157,11 @@ export class AccessibilityWidget {
     this.config.position = normalizePosition(this.config.position)
     this.size = normalizeSize(this.config.size)
     this.state = loadState(this.config.persistence!)
+    // On a fresh visit, seed conservative defaults from the visitor's OS
+    // preferences without overriding any persisted or explicit choice.
+    if ((this.config.respectOsPreferences ?? true) && this.state.profile === null && !hasPersistedState(this.config.persistence!)) {
+      this.state = { ...this.state, ...osPreferenceDefaults(readOsPreferences()) }
+    }
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────
@@ -176,12 +207,27 @@ export class AccessibilityWidget {
     this.structureDialog.hidden = true
     this.structureDialog.addEventListener('click', e => this.handleStructureClick(e))
 
-    this.root.append(this.trigger, this.overlay, this.panel, this.structureDialog)
+    // Polite live region for announcing tool/profile changes to screen readers.
+    this.liveRegion = document.createElement('div')
+    this.liveRegion.className = 'accessibility-widget-sr-only'
+    this.liveRegion.setAttribute('role', 'status')
+    this.liveRegion.setAttribute('aria-live', 'polite')
+    this.liveRegion.setAttribute('aria-atomic', 'true')
+
+    this.root.append(this.trigger, this.overlay, this.panel, this.structureDialog, this.liveRegion)
     // Always append to <body> directly so the widget lives as a sibling
     // of #accessibility-widget-host and is never affected by the effects (font-size,
     // contrast, filters etc) applied to the page content wrapper.
     document.body.appendChild(this.root)
     document.addEventListener('keydown', this.handleGlobalShortcut, this.shortcutListenerOptions)
+    if ((this.config.respectOsPreferences ?? true) && typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      try {
+        this.motionMql = window.matchMedia('(prefers-reduced-motion: reduce)')
+        this.motionMql.addEventListener?.('change', this.handleMotionChange)
+      } catch {
+        this.motionMql = null
+      }
+    }
 
     this.update()
     applyEffects(this.state)
@@ -193,6 +239,8 @@ export class AccessibilityWidget {
     unwrapHost()
     releaseFocus()
     document.removeEventListener('keydown', this.handleGlobalShortcut, this.shortcutListenerOptions)
+    this.motionMql?.removeEventListener?.('change', this.handleMotionChange)
+    this.motionMql = null
     if (this.root) {
       this.root.remove()
       this.root = null
@@ -201,6 +249,7 @@ export class AccessibilityWidget {
     this.overlay = null
     this.panel = null
     this.structureDialog = null
+    this.liveRegion = null
   }
 
   // ── Open / close ───────────────────────────────────────────────────────
@@ -235,9 +284,11 @@ export class AccessibilityWidget {
     const scroll = this.captureScrollPosition()
     const focus = this.capturePanelFocusSelector()
     this.pageStructureOpen = false
+    this.userInteracted = true
     this.state = { ...DEFAULT_STATE }
     this.persist()
     applyEffects(this.state)
+    this.announce('All settings reset')
     this.config.onReset?.()
     this.update(scroll, focus)
   }
@@ -303,12 +354,6 @@ export class AccessibilityWidget {
     this.applyTheme()
   }
 
-  /** Override the trigger button colour preset. */
-  setTriggerScheme(scheme: TriggerScheme): void {
-    this.config.triggerScheme = scheme
-    this.applyTriggerScheme()
-  }
-
   /** Set which profiles are hidden from the panel (undefined shows all). */
   setHiddenProfiles(hiddenProfiles?: AccessibilityProfile[]): void {
     this.config.hiddenProfiles = hiddenProfiles
@@ -354,24 +399,9 @@ export class AccessibilityWidget {
     setCssVar(this.root, '--accessibility-widget-bg', t?.background)
     setCssVar(this.root, '--accessibility-widget-text', t?.text)
     // Foreground that stays legible on top of the accent (active tiles, header).
+    // The trigger icon follows --on-primary (a readable foreground for the
+    // accent), so the floating button stays legible against any accent colour.
     setCssVar(this.root, '--accessibility-widget-on-primary', accentColor ? readableOn(accentColor) : undefined)
-    this.applyTriggerScheme()
-  }
-
-  private applyTriggerScheme(): void {
-    if (!this.root) return
-    // Resolution:
-    //   - 'dark'  → black fill, white icon
-    //   - 'light' → white fill, dark icon
-    //   - 'auto' (default) → filled with the accent colour, white icon (branded)
-    const wanted = this.config.triggerScheme ?? 'auto'
-    const setTrigger = (bg: string, icon: string) => {
-      this.root!.style.setProperty('--accessibility-widget-trigger-bg', bg)
-      this.root!.style.setProperty('--accessibility-widget-trigger-icon', icon)
-    }
-    if (wanted === 'dark') setTrigger('#0c0c0c', '#ffffff')
-    else if (wanted === 'light') setTrigger('#ffffff', '#0c0c0c')
-    else setTrigger('var(--accessibility-widget-primary)', '#ffffff')
   }
 
   // ── Panel click handling ───────────────────────────────────────────────
@@ -508,9 +538,11 @@ export class AccessibilityWidget {
   private toggleProfile(id: AccessibilityProfile): void {
     if (this.state.profile === id) {
       this.state = { ...DEFAULT_STATE }
+      this.announce('Profiles reset')
     } else {
       const preset = PROFILE_PRESETS[id] ?? {}
       this.state = { ...DEFAULT_STATE, profile: id, ...preset }
+      this.announce(`${PROFILE_LABEL[id] ?? id} profile applied`)
     }
     this.commit()
   }
@@ -526,17 +558,21 @@ export class AccessibilityWidget {
       }
     }
     ;(this.state as unknown as Record<string, unknown>)[key] = next
+    const label = (translations as unknown as Record<string, string>)[key] ?? key
+    this.announce(maxLevel <= 1 ? `${label} ${next > 0 ? 'on' : 'off'}` : next > 0 ? `${label}, level ${next} of ${maxLevel}` : `${label} off`)
     this.commit()
   }
 
   private cycleAlignment(): void {
     const currentIndex = ALIGNMENT_LEVELS.indexOf(this.state.textAlignment)
     this.state.textAlignment = ALIGNMENT_LEVELS[(currentIndex + 1) % ALIGNMENT_LEVELS.length]
+    this.announce(`Text alignment ${this.state.textAlignment}`)
     this.commit()
   }
 
   /** Persist, apply effects, and re-render after a state change. */
   private commit(): void {
+    this.userInteracted = true
     const scroll = this.captureScrollPosition()
     const focus = this.capturePanelFocusSelector()
     this.persist()
@@ -546,6 +582,11 @@ export class AccessibilityWidget {
 
   private persist(): void {
     saveState(this.config.persistence!, this.state)
+  }
+
+  /** Announce a change to assistive technology via the polite live region. */
+  private announce(message: string): void {
+    if (this.liveRegion) this.liveRegion.textContent = message
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────

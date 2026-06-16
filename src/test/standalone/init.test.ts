@@ -26,7 +26,6 @@ describe('parseConfigFromElement', () => {
     el.dataset.size = 'l'
     el.dataset.offsetX = '32'
     el.dataset.offsetY = '24'
-    el.dataset.triggerScheme = 'dark'
     el.dataset.persistence = 'false'
 
     expect(parseConfigFromElement(el)).toEqual({
@@ -36,7 +35,6 @@ describe('parseConfigFromElement', () => {
       size: 'L',
       offsetX: 32,
       offsetY: 24,
-      triggerScheme: 'dark',
       persistence: false,
     })
   })

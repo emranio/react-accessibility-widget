@@ -18,6 +18,7 @@ import { disableMagnifier, enableMagnifier } from './magnifier'
 import { disableReadingGuide, enableReadingGuide } from './reading-guide'
 import { disableReadingLens, enableReadingLens } from './reading-lens'
 import { disableReadingMask, enableReadingMask } from './reading-mask'
+import { disableReadAloud, enableReadAloud } from './read-aloud'
 import { syncWrapperVars } from './wrapper-vars'
 
 export { HOST_WRAPPER_ID, ensureHostWrapper, unwrapHost } from './host'
@@ -45,6 +46,7 @@ function effectToggles(state: AccessibilityWidgetState): Array<[string, boolean]
     ['accessibility-widget-effect-big-cursor', state.bigCursor > 0],
     ['accessibility-widget-effect-reading-mask-active', state.readingMask > 0],
     ['accessibility-widget-effect-reading-guide-active', state.readingGuide > 0],
+    ['accessibility-widget-effect-focus-highlight', state.focusHighlight > 0],
   ]
 }
 
@@ -75,6 +77,8 @@ export function applyEffects(state: AccessibilityWidgetState): void {
   else disableReadingMask()
   if (state.readingGuide > 0) enableReadingGuide(state.readingGuide)
   else disableReadingGuide()
+  if (state.readAloud > 0) enableReadAloud()
+  else disableReadAloud()
 }
 
 /** Remove every applied effect: classes, dynamic CSS, filter, and reading aids. */
@@ -92,4 +96,5 @@ export function clearEffects(): void {
   disableReadingLens()
   disableReadingMask()
   disableReadingGuide()
+  disableReadAloud()
 }

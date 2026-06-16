@@ -27,6 +27,5 @@ export type {
   Position,
   TextAlignment,
   ToolKey,
-  TriggerScheme,
   WidgetSize,
 } from './types'

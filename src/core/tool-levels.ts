@@ -19,6 +19,8 @@ export const TOOL_MAX_LEVELS = {
   bigCursor: 3,
   readingMask: 3,
   readingGuide: 1,
+  readAloud: 1,
+  focusHighlight: 1,
   lineHeight: 3,
   letterSpacing: 3,
   darkContrast: 3,

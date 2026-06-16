@@ -10,7 +10,6 @@
 import {
   AccessibilityWidget,
   type AccessibilityWidgetConfig,
-  type TriggerScheme,
   type WidgetSize,
 } from '../core'
 
@@ -36,8 +35,8 @@ function parseNumber(value: string | undefined): number | undefined {
  * Build a config from a script tag's `data-*` attributes.
  *
  * Recognised: `data-title`, `data-accent-color`, `data-position` (left|right),
- * `data-size` (S|L), `data-offset-x`, `data-offset-y`, `data-trigger-scheme`
- * (auto|dark|light), `data-persistence` (false to disable).
+ * `data-size` (S|L), `data-offset-x`, `data-offset-y`, `data-persistence`
+ * (false to disable).
  */
 export function parseConfigFromElement(el: Element | null): AccessibilityWidgetConfig {
   if (!el || typeof HTMLElement === 'undefined' || !(el instanceof HTMLElement)) return {}
@@ -55,9 +54,6 @@ export function parseConfigFromElement(el: Element | null): AccessibilityWidgetC
   if (offsetX != null) config.offsetX = offsetX
   const offsetY = parseNumber(d.offsetY)
   if (offsetY != null) config.offsetY = offsetY
-  if (d.triggerScheme === 'auto' || d.triggerScheme === 'dark' || d.triggerScheme === 'light') {
-    config.triggerScheme = d.triggerScheme as TriggerScheme
-  }
   if (d.persistence != null) config.persistence = d.persistence !== 'false'
 
   return config

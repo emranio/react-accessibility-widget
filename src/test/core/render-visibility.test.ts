@@ -36,7 +36,7 @@ describe('renderPanel visibility', () => {
     const html = renderPanel(DEFAULT_STATE, 'S', {
       hiddenProfiles: [
         'seizure-safe', 'vision-impaired', 'light-sensitivity', 'color-blind',
-        'dyslexia', 'adhd-friendly', 'cognitive-disability',
+        'dyslexia', 'adhd-friendly', 'cognitive-disability', 'keyboard-motor', 'blind-screen-reader',
       ],
     })
     expect(html).not.toContain('data-section="profiles"')

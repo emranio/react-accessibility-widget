@@ -86,4 +86,9 @@ export const hostEffects = `
   transition-delay: 0s !important;
   transition-duration: 0.001ms !important;
 }
+#accessibility-widget-host.accessibility-widget-effect-focus-highlight :focus,
+#accessibility-widget-host.accessibility-widget-effect-focus-highlight :focus-visible {
+  outline: 3px solid #1d4ed8 !important;
+  outline-offset: 2px !important;
+}
 `

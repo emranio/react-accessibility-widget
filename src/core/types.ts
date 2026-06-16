@@ -26,9 +26,8 @@ export type AccessibilityProfile =
   | 'dyslexia'
   | 'adhd-friendly'
   | 'cognitive-disability'
-
-/** Trigger button colour preset. */
-export type TriggerScheme = 'auto' | 'dark' | 'light'
+  | 'keyboard-motor'
+  | 'blind-screen-reader'
 
 /** Identifier for a panel tool, used to show/hide individual tools via config. */
 export type ToolKey =
@@ -50,6 +49,8 @@ export type ToolKey =
   | 'bigCursor'
   | 'readingMask'
   | 'readingGuide'
+  | 'readAloud'
+  | 'focusHighlight'
   | 'pageStructure'
   | 'hideImages'
   | 'offAnimations'
@@ -69,17 +70,16 @@ export interface AccessibilityWidgetConfig {
     background?: string
     text?: string
   }
-  /**
-   * Trigger button colour preset.
-   * - 'auto'  — filled with the accent colour, white icon (default)
-   * - 'dark'  — black background, white icon
-   * - 'light' — white background, dark icon
-   */
-  triggerScheme?: TriggerScheme
   /** Profiles to hide from the panel (omit to show all). */
   hiddenProfiles?: AccessibilityProfile[]
   /** Tools to hide from the panel (omit to show all). A section with no visible tools is hidden. */
   hiddenTools?: ToolKey[]
+  /**
+   * Derive conservative defaults from the visitor's OS/browser preferences
+   * (reduced-motion → Reduce Animations, increased-contrast → High Contrast) on
+   * a fresh visit. Never overrides a persisted or explicit choice. Default true.
+   */
+  respectOsPreferences?: boolean
   persistence?: boolean
   onOpen?: () => void
   onClose?: () => void
@@ -101,6 +101,8 @@ export interface AccessibilityWidgetState {
   bigCursor: AdjustmentLevel
   readingMask: AdjustmentLevel
   readingGuide: AdjustmentLevel
+  readAloud: AdjustmentLevel
+  focusHighlight: AdjustmentLevel
   darkContrast: AdjustmentLevel
   lightContrast: AdjustmentLevel
   highContrast: AdjustmentLevel
@@ -142,6 +144,8 @@ export const DEFAULT_STATE: AccessibilityWidgetState = {
   bigCursor: 0,
   readingMask: 0,
   readingGuide: 0,
+  readAloud: 0,
+  focusHighlight: 0,
   darkContrast: 0,
   lightContrast: 0,
   highContrast: 0,

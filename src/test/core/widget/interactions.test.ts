@@ -52,6 +52,17 @@ const EXPECTED_PROFILE_PRESETS = {
     highlightTitles: 2,
     highlightLinks: 2,
   },
+  'keyboard-motor': {
+    focusHighlight: 1,
+    bigCursor: 2,
+    highlightLinks: 2,
+  },
+  'blind-screen-reader': {
+    readAloud: 1,
+    highlightTitles: 2,
+    highlightLinks: 2,
+    legibleFonts: 2,
+  },
 } satisfies Record<AccessibilityProfile, Partial<AccessibilityWidgetState>>
 
 describe('Accessibility Widget — panel click interactions', () => {

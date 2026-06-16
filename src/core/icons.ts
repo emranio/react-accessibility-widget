@@ -41,10 +41,14 @@ import { __iconNode as textAlignJustifyIcon } from 'lucide-react/dist/esm/icons/
 import { __iconNode as textAlignStartIcon } from 'lucide-react/dist/esm/icons/text-align-start.mjs'
 import { __iconNode as textInitialIcon } from 'lucide-react/dist/esm/icons/text-initial.mjs'
 import { __iconNode as venetianMaskIcon } from 'lucide-react/dist/esm/icons/venetian-mask.mjs'
+import { __iconNode as volume2Icon } from 'lucide-react/dist/esm/icons/volume-2.mjs'
 import { __iconNode as wholeWordIcon } from 'lucide-react/dist/esm/icons/whole-word.mjs'
 import { __iconNode as xIcon } from 'lucide-react/dist/esm/icons/x.mjs'
 import { __iconNode as zapIcon } from 'lucide-react/dist/esm/icons/zap.mjs'
 import { __iconNode as zoomInIcon } from 'lucide-react/dist/esm/icons/zoom-in.mjs'
+import { __iconNode as earIcon } from 'lucide-react/dist/esm/icons/ear.mjs'
+import { __iconNode as keyboardIcon } from 'lucide-react/dist/esm/icons/keyboard.mjs'
+import { __iconNode as squareDashedMousePointerIcon } from 'lucide-react/dist/esm/icons/square-dashed-mouse-pointer.mjs'
 
 import { escapeAttr } from './utils/html'
 
@@ -89,6 +93,8 @@ export const ICONS = {
   cognitive: lucideSvg(brainIcon),
   colorBlind: lucideSvg(paletteIcon),
   dyslexia: lucideSvg(bookOpenTextIcon),
+  keyboardMotor: lucideSvg(keyboardIcon),
+  blindScreenReader: lucideSvg(earIcon),
 
   // Content adjustments.
   legibleFonts: lucideSvg(textInitialIcon),
@@ -100,6 +106,8 @@ export const ICONS = {
   bigCursor: lucideSvg(mousePointer2Icon),
   readingMask: lucideSvg(rows3Icon),
   readingGuide: lucideSvg(moveHorizontalIcon),
+  readAloud: lucideSvg(volume2Icon),
+  focusHighlight: lucideSvg(squareDashedMousePointerIcon),
   highlightLinks: lucideSvg(linkIcon),
   lineHeight: lucideSvg(betweenVerticalStartIcon),
   letterSpacing: lucideSvg(betweenHorizontalStartIcon),

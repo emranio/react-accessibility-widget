@@ -14,7 +14,6 @@ import type {
   ConformanceStatus,
   Position,
   ToolKey,
-  TriggerScheme,
   WcagLevel,
   WcagVersion,
   WidgetSize,
@@ -30,6 +29,8 @@ const PROFILES: Array<{ id: AccessibilityProfile; label: string }> = [
   { id: 'dyslexia', label: 'Dyslexia' },
   { id: 'adhd-friendly', label: 'ADHD Friendly' },
   { id: 'cognitive-disability', label: 'Cognitive Disability' },
+  { id: 'keyboard-motor', label: 'Keyboard / Motor' },
+  { id: 'blind-screen-reader', label: 'Screen Reader' },
 ]
 
 const TOOLS: Array<{ id: ToolKey; label: string; group: 'Content' | 'Color' | 'Visibility' }> = [
@@ -51,6 +52,8 @@ const TOOLS: Array<{ id: ToolKey; label: string; group: 'Content' | 'Color' | 'V
   { id: 'bigCursor', label: 'Big Cursor', group: 'Visibility' },
   { id: 'readingMask', label: 'Reading Mask', group: 'Visibility' },
   { id: 'readingGuide', label: 'Reading Guide', group: 'Visibility' },
+  { id: 'readAloud', label: 'Read Aloud', group: 'Visibility' },
+  { id: 'focusHighlight', label: 'Focus Highlight', group: 'Visibility' },
   { id: 'pageStructure', label: 'Page Structure', group: 'Visibility' },
   { id: 'hideImages', label: 'Hide Images', group: 'Visibility' },
   { id: 'offAnimations', label: 'Reduce Animations', group: 'Visibility' },
@@ -77,7 +80,6 @@ export default function Configurator() {
   const [accentColor, setAccentColor] = useState('#1d4ed8')
   const [position, setPosition] = useState<Position>('right')
   const [size, setSize] = useState<WidgetSize>('S')
-  const [triggerScheme, setTriggerScheme] = useState<TriggerScheme>('auto')
   const [offsetX, setOffsetX] = useState(20)
   const [offsetY, setOffsetY] = useState(20)
   const [persistence, setPersistence] = useState(true)
@@ -129,7 +131,6 @@ export default function Configurator() {
       `data-size="${size}"`,
       offsetX !== 20 && `data-offset-x="${offsetX}"`,
       offsetY !== 20 && `data-offset-y="${offsetY}"`,
-      triggerScheme !== 'auto' && `data-trigger-scheme="${triggerScheme}"`,
       !persistence && 'data-persistence="false"',
     ].filter(Boolean).join('\n  ')
     const globalParts: Record<string, unknown> = {}
@@ -139,7 +140,7 @@ export default function Configurator() {
       ? `<script>\n  window.AccessibilityWidgetConfig = ${JSON.stringify(globalParts)};\n</script>\n`
       : ''
     return `${globalCfg}<script\n  src="${CDN}"\n  ${dataAttrs}></script>`
-  }, [title, accentColor, position, size, offsetX, offsetY, triggerScheme, persistence, hiddenProfiles, hiddenTools])
+  }, [title, accentColor, position, size, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools])
 
   const reactSnippet = useMemo(() => {
     const props = [
@@ -147,7 +148,6 @@ export default function Configurator() {
       `accentColor="${accentColor}"`,
       `position="${position}"`,
       `size="${size}"`,
-      triggerScheme !== 'auto' && `triggerScheme="${triggerScheme}"`,
       offsetX !== 20 && `offsetX={${offsetX}}`,
       offsetY !== 20 && `offsetY={${offsetY}}`,
       !persistence && 'persistence={false}',
@@ -155,15 +155,15 @@ export default function Configurator() {
       hiddenTools.length > 0 && `hiddenTools={${JSON.stringify(hiddenTools)}}`,
     ].filter(Boolean).join('\n  ')
     return `import { AccessibilityWidget } from '@firefam/react-accessibility-widget'\n\n<AccessibilityWidget\n  ${props}\n/>`
-  }, [title, accentColor, position, size, offsetX, offsetY, triggerScheme, persistence, hiddenProfiles, hiddenTools])
+  }, [title, accentColor, position, size, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools])
 
   const jsonSnippet = useMemo(
     () => JSON.stringify(
-      { title, accentColor, position, size, triggerScheme, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools },
+      { title, accentColor, position, size, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools },
       null,
       2,
     ),
-    [title, accentColor, position, size, triggerScheme, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools],
+    [title, accentColor, position, size, offsetX, offsetY, persistence, hiddenProfiles, hiddenTools],
   )
 
   function copy(text: string, key: string) {
@@ -200,7 +200,6 @@ export default function Configurator() {
     if (typeof parsed.accentColor === 'string') setAccentColor(parsed.accentColor)
     if (parsed.position === 'left' || parsed.position === 'right') setPosition(parsed.position)
     if (parsed.size === 'S' || parsed.size === 'L') setSize(parsed.size)
-    if (parsed.triggerScheme === 'auto' || parsed.triggerScheme === 'dark' || parsed.triggerScheme === 'light') setTriggerScheme(parsed.triggerScheme)
     if (typeof parsed.offsetX === 'number') setOffsetX(parsed.offsetX)
     if (typeof parsed.offsetY === 'number') setOffsetY(parsed.offsetY)
     if (typeof parsed.persistence === 'boolean') setPersistence(parsed.persistence)
@@ -240,8 +239,6 @@ export default function Configurator() {
             </div>
           </div>
 
-          <Segmented label="Trigger style" value={triggerScheme} onChange={setTriggerScheme}
-            options={[{ id: 'auto', label: 'Auto' }, { id: 'dark', label: 'Dark' }, { id: 'light', label: 'Light' }]} />
           <Segmented label="Panel size" value={size} onChange={setSize}
             options={[{ id: 'S', label: 'Small' }, { id: 'L', label: 'Large' }]} />
           <Segmented label="Position" value={position} onChange={setPosition}
@@ -410,7 +407,6 @@ export default function Configurator() {
         accentColor={accentColor}
         position={position}
         size={size}
-        triggerScheme={triggerScheme}
         offsetX={offsetX}
         offsetY={offsetY}
         persistence={persistence}

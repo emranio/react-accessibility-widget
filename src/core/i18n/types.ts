@@ -37,6 +37,8 @@ export interface Translations {
   dyslexia: string
   adhdFriendly: string
   cognitiveDisability: string
+  keyboardMotor: string
+  blindScreenReader: string
   // Content adjustments
   legibleFonts: string
   dyslexiaFriendly: string
@@ -47,6 +49,8 @@ export interface Translations {
   bigCursor: string
   readingMask: string
   readingGuide: string
+  readAloud: string
+  focusHighlight: string
   highlightLinks: string
   lineHeight: string
   letterSpacing: string

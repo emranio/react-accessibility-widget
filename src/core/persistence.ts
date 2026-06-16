@@ -18,6 +18,8 @@ const PROFILES: ReadonlySet<string> = new Set<string>([
   'dyslexia',
   'adhd-friendly',
   'cognitive-disability',
+  'keyboard-motor',
+  'blind-screen-reader',
 ])
 
 /** The valid text-alignment values, used when validating persisted state. */
@@ -81,6 +83,17 @@ export function loadState(persistence: boolean): AccessibilityWidgetState {
     // Corrupt or inaccessible storage — fall back to defaults.
   }
   return { ...DEFAULT_STATE }
+}
+
+/** Whether persisted widget state currently exists in `localStorage`. */
+export function hasPersistedState(persistence: boolean): boolean {
+  if (!persistence) return false
+  if (typeof localStorage === 'undefined') return false
+  try {
+    return localStorage.getItem(STORAGE_KEY) != null
+  } catch {
+    return false
+  }
 }
 
 /** Persist state to `localStorage`, silently ignoring storage failures. */

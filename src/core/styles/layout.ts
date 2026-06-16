@@ -23,8 +23,8 @@ export const layout = `
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: var(--accessibility-widget-trigger-bg, var(--accessibility-widget-primary));
-  color: var(--accessibility-widget-trigger-icon, #fff);
+  background: var(--accessibility-widget-primary);
+  color: var(--accessibility-widget-on-primary, #fff);
   display: flex;
   align-items: center;
   justify-content: center;

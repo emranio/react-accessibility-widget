@@ -91,6 +91,8 @@ export function enableMagnifier(level: number): void {
   }
   magnifierEl = document.createElement('div')
   magnifierEl.className = 'accessibility-widget-magnify-cursor'
+  // Decorative duplicate of page text — hide it from assistive tech.
+  magnifierEl.setAttribute('aria-hidden', 'true')
   magnifierEl.style.display = 'none'
   document.body.appendChild(magnifierEl)
   updateMagnifierAppearance(level)

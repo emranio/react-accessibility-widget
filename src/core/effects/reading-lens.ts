@@ -124,6 +124,10 @@ export function enableReadingLens(level: number): void {
   lensEl = document.createElement('div')
   lensEl.className = 'accessibility-widget-reading-lens'
   lensEl.setAttribute('aria-hidden', 'true')
+  // `inert` removes the cloned host subtree from the a11y tree AND the tab
+  // order. aria-hidden alone hides it from screen readers but leaves cloned
+  // links/inputs focusable, creating duplicate tab stops — inert prevents that.
+  lensEl.setAttribute('inert', '')
   lensEl.style.display = 'none'
   lensEl.style.left = '0'
   lensEl.style.top = '0'

@@ -37,6 +37,8 @@ const PROFILE_TOOLTIPS: Record<AccessibilityProfile, string> = {
   dyslexia: 'Uses the dyslexia-friendly font with more spacing and left-aligned text.',
   'adhd-friendly': 'Adds a reading mask, reduces motion, and lightly highlights links for focus.',
   'cognitive-disability': 'Uses a hyperlegible font with clearer headings, links, spacing, and text size.',
+  'keyboard-motor': 'Strengthens focus outlines, enlarges the cursor, and highlights links for keyboard and motor navigation.',
+  'blind-screen-reader': 'Enables click-to-read text-to-speech with clearer headings, links, and a legible font.',
 }
 
 const TOOL_TOOLTIPS = {
@@ -58,6 +60,8 @@ const TOOL_TOOLTIPS = {
   bigCursor: 'Enlarges the cursor across three levels.',
   readingMask: 'Dims surrounding content and keeps one reading band in focus.',
   readingGuide: 'Adds a guide line that follows the pointer.',
+  readAloud: 'Reads page text aloud when you click it (text-to-speech).',
+  focusHighlight: 'Adds a strong outline around the focused element for keyboard navigation.',
   pageStructure: 'Opens a headings, landmarks, and links navigator for the current page.',
   hideImages: 'Hides images and videos from the page.',
   offAnimations: 'Reduces animation and motion effects.',
@@ -118,6 +122,8 @@ export function renderPanel(
     { id: 'dyslexia',             label: t.dyslexia,            icon: ICONS.dyslexia },
     { id: 'adhd-friendly',        label: t.adhdFriendly,        icon: ICONS.adhd },
     { id: 'cognitive-disability', label: t.cognitiveDisability, icon: ICONS.cognitive },
+    { id: 'keyboard-motor',       label: t.keyboardMotor,       icon: ICONS.keyboardMotor },
+    { id: 'blind-screen-reader',  label: t.blindScreenReader,   icon: ICONS.blindScreenReader },
   ]
 
   const hiddenProfiles = new Set<AccessibilityProfile>(options.hiddenProfiles ?? [])
@@ -150,6 +156,8 @@ export function renderPanel(
     show('bigCursor') && adjustmentTile(state, 'bigCursor', ICONS.bigCursor, t.bigCursor, TOOL_TOOLTIPS.bigCursor),
     show('readingMask') && adjustmentTile(state, 'readingMask', ICONS.readingMask, t.readingMask, TOOL_TOOLTIPS.readingMask),
     show('readingGuide') && adjustmentTile(state, 'readingGuide', ICONS.readingGuide, t.readingGuide, TOOL_TOOLTIPS.readingGuide),
+    show('readAloud') && adjustmentTile(state, 'readAloud', ICONS.readAloud, t.readAloud, TOOL_TOOLTIPS.readAloud),
+    show('focusHighlight') && adjustmentTile(state, 'focusHighlight', ICONS.focusHighlight, t.focusHighlight, TOOL_TOOLTIPS.focusHighlight),
     show('pageStructure') && toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure }),
     show('hideImages') && adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages),
     show('offAnimations') && adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations),

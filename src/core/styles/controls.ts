@@ -123,19 +123,19 @@ export const controls = `
   position: relative;
   border: 1px solid var(--accessibility-widget-border);
   border-radius: 8px;
-  padding: 10px 34px 10px 12px;
+  padding: 14px 12px 13px;
   background: #ffffff;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   font: inherit;
   color: inherit;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 9px;
-  min-height: 58px;
+  min-height: 104px;
   width: 100%;
 }
 .accessibility-widget-card:hover {
@@ -169,10 +169,10 @@ export const controls = `
   font-size: 12px;
   font-weight: 750;
   line-height: 1.2;
-  flex: 1;
+  width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
-  text-align: left;
+  text-align: center;
   color: inherit;
 }
 .accessibility-widget-info {

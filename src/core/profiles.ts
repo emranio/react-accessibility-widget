@@ -95,4 +95,22 @@ export const PROFILE_PRESETS: Record<AccessibilityProfile, ProfilePreset> = {
     highlightTitles: 2,
     highlightLinks: 2,
   }),
+  // Keyboard / motor — WCAG 2.1.1, 2.4.7. Signature: make focus and targets
+  // obvious. Strong focus outlines, a larger cursor, and highlighted links aid
+  // keyboard-only and motor-impaired navigation. An aid, not a replacement for
+  // a genuinely keyboard-operable site.
+  'keyboard-motor': defineProfilePreset({
+    focusHighlight: 1,
+    bigCursor: 2,
+    highlightLinks: 2,
+  }),
+  // Blind / screen-reader — WCAG 1.1.1, 1.3.1. Signature: hear and parse the
+  // page. Click-to-read text-to-speech plus clearer headings, links, and a
+  // legible font; pairs with the page-structure navigator.
+  'blind-screen-reader': defineProfilePreset({
+    readAloud: 1,
+    highlightTitles: 2,
+    highlightLinks: 2,
+    legibleFonts: 2,
+  }),
 }

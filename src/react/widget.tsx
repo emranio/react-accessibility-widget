@@ -57,11 +57,6 @@ export function AccessibilityWidget(props: AccessibilityWidgetProps) {
 
   useEffect(() => {
     if (!instanceRef.current) return
-    if (props.triggerScheme) instanceRef.current.setTriggerScheme(props.triggerScheme)
-  }, [props.triggerScheme])
-
-  useEffect(() => {
-    if (!instanceRef.current) return
     instanceRef.current.setTitle(props.title)
   }, [props.title])
 

@@ -43,7 +43,6 @@ export default function App() {
         accentColor="#1d4ed8"
         position="right"
         size="S"
-        triggerScheme="auto"
       />
     </>
   )
@@ -111,7 +110,6 @@ Common config options:
 - `accentColor` — accent color for the header, selected tools, and level indicators.
 - `position` — `'left'` or `'right'`.
 - `size` — `'S'` or `'L'`.
-- `triggerScheme` — `'auto'` (accent fill), `'dark'`, or `'light'`.
 - `offsetX` / `offsetY` — trigger distance from its anchored edge (px).
 - `hiddenProfiles` / `hiddenTools` — hide specific profiles/tools.
 - `persistence` — persist the visitor's settings to `localStorage` (default `true`).
