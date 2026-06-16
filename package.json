@@ -14,19 +14,24 @@
   },
   "keywords": [
     "accessibility",
+    "a11y",
     "widget",
+    "toolbar",
     "react",
+    "wcag",
+    "ada",
+    "accessibility-statement",
     "dyslexia",
     "contrast",
     "color-blind",
     "keyboard-navigation",
-    "i18n",
-    "rtl",
     "dark-mode"
   ],
   "main": "./dist/react.cjs.js",
   "module": "./dist/react.esm.js",
   "types": "./dist/react.d.ts",
+  "unpkg": "./dist/accessibility-widget.global.js",
+  "jsdelivr": "./dist/accessibility-widget.global.js",
   "exports": {
     ".": {
       "types": "./dist/react.d.ts",
@@ -37,6 +42,9 @@
       "types": "./dist/react.d.ts",
       "import": "./dist/react.esm.js",
       "require": "./dist/react.cjs.js"
+    },
+    "./standalone": {
+      "default": "./dist/accessibility-widget.global.js"
     }
   },
   "files": [

@@ -14,5 +14,11 @@ export default defineConfig({
   },
   build: {
     outDir: 'demo-dist',
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        configurator: 'configurator.html',
+      },
+    },
   },
 })

@@ -5,11 +5,14 @@
  * the current state. The widget assigns this string to the panel's `innerHTML`
  * on every state change; click handling is delegated by the widget via the
  * `data-*` attributes embedded here.
+ *
+ * Tools and profiles can be hidden via `hiddenTools` / `hiddenProfiles`; a
+ * section whose tools are all hidden is omitted entirely.
  */
 import { ICONS } from '../icons'
 import { translations } from '../i18n'
 import { TEXT_ALIGNMENT_MAX_LEVEL } from '../tool-levels'
-import type { AccessibilityProfile, AccessibilityWidgetState, Position, WidgetSize } from '../types'
+import type { AccessibilityProfile, AccessibilityWidgetState, Position, ToolKey, WidgetSize } from '../types'
 import { escapeHtml } from '../utils/html'
 import {
   adjustmentTile,
@@ -85,10 +88,22 @@ function sectionCard(id: PanelSectionId, label: string, collapsed: boolean, body
   `
 }
 
+/** Drop falsy entries (hidden tiles / skipped sections) and concatenate. */
+function join(parts: Array<string | false>): string {
+  return parts.filter(Boolean).join('')
+}
+
 export function renderPanel(
   state: AccessibilityWidgetState,
   size: WidgetSize,
-  options: { pageStructureOpen?: boolean; title?: string; position?: Position; collapsedSections?: CollapsedSections } = {},
+  options: {
+    pageStructureOpen?: boolean
+    title?: string
+    position?: Position
+    collapsedSections?: CollapsedSections
+    hiddenProfiles?: AccessibilityProfile[]
+    hiddenTools?: ToolKey[]
+  } = {},
 ): string {
   const t = translations
   const title = escapeHtml(options.title?.trim() || t.title)
@@ -104,6 +119,78 @@ export function renderPanel(
     { id: 'adhd-friendly',        label: t.adhdFriendly,        icon: ICONS.adhd },
     { id: 'cognitive-disability', label: t.cognitiveDisability, icon: ICONS.cognitive },
   ]
+
+  const hiddenProfiles = new Set<AccessibilityProfile>(options.hiddenProfiles ?? [])
+  const hiddenTools = new Set<ToolKey>(options.hiddenTools ?? [])
+  const visibleProfiles = PROFILES.filter(p => !hiddenProfiles.has(p.id))
+  const show = (key: ToolKey): boolean => !hiddenTools.has(key)
+
+  const contentTiles = join([
+    show('legibleFonts') && legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts),
+    show('highlightTitles') && adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles),
+    show('fontSize') && adjustmentTile(state, 'fontSize', ICONS.fontSizing, t.fontSize, TOOL_TOOLTIPS.fontSize),
+    show('textMagnifier') && adjustmentTile(state, 'textMagnifier', ICONS.textMagnifier, t.textMagnifier, TOOL_TOOLTIPS.textMagnifier),
+    show('highlightLinks') && adjustmentTile(state, 'highlightLinks', ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks),
+    show('lineHeight') && adjustmentTile(state, 'lineHeight', ICONS.lineHeight, t.lineHeight, TOOL_TOOLTIPS.lineHeight),
+    show('letterSpacing') && adjustmentTile(state, 'letterSpacing', ICONS.letterSpacing, t.letterSpacing, TOOL_TOOLTIPS.letterSpacing),
+    show('textAlignment') && toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment }),
+  ])
+
+  const colorTiles = join([
+    show('darkContrast') && adjustmentTile(state, 'darkContrast', ICONS.darkContrast, t.darkContrast, TOOL_TOOLTIPS.darkContrast),
+    show('lightContrast') && adjustmentTile(state, 'lightContrast', ICONS.lightContrast, t.lightContrast, TOOL_TOOLTIPS.lightContrast),
+    show('highContrast') && adjustmentTile(state, 'highContrast', ICONS.highContrast, t.highContrast, TOOL_TOOLTIPS.highContrast),
+    show('monochrome') && adjustmentTile(state, 'monochrome', ICONS.monochrome, t.monochrome, TOOL_TOOLTIPS.monochrome),
+    show('invertColors') && adjustmentTile(state, 'invertColors', ICONS.invertColors, t.invertColors, TOOL_TOOLTIPS.invertColors),
+    show('colorBlind') && adjustmentTile(state, 'colorBlind', ICONS.colorBlindVisual, t.colorBlind, TOOL_TOOLTIPS.colorBlind),
+  ])
+
+  const visibilityTiles = join([
+    show('readingLens') && adjustmentTile(state, 'readingLens', ICONS.readingLens, t.readingLens, TOOL_TOOLTIPS.readingLens),
+    show('bigCursor') && adjustmentTile(state, 'bigCursor', ICONS.bigCursor, t.bigCursor, TOOL_TOOLTIPS.bigCursor),
+    show('readingMask') && adjustmentTile(state, 'readingMask', ICONS.readingMask, t.readingMask, TOOL_TOOLTIPS.readingMask),
+    show('readingGuide') && adjustmentTile(state, 'readingGuide', ICONS.readingGuide, t.readingGuide, TOOL_TOOLTIPS.readingGuide),
+    show('pageStructure') && toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure }),
+    show('hideImages') && adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages),
+    show('offAnimations') && adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations),
+  ])
+
+  const sections = join([
+    sectionCard('settings', t.widgetSettings, collapsedSections.settings, `
+          <div class="accessibility-widget-setting-row">
+            <span class="accessibility-widget-setting-label">${t.widgetSize}</span>
+            ${sizeSwitch(size, t.widgetSize, t.smallSize, t.largeSize)}
+          </div>
+          <div class="accessibility-widget-setting-row accessibility-widget-setting-row--stack">
+            <span class="accessibility-widget-setting-label">${t.widgetPosition}</span>
+            ${positionSwitch(position, t.widgetPosition, t.leftPosition, t.rightPosition)}
+          </div>
+        `),
+
+    visibleProfiles.length > 0 && sectionCard('profiles', t.profiles, collapsedSections.profiles, `
+          <div class="accessibility-widget-grid">
+            ${visibleProfiles.map(p => profileCard(p.id, p.label, p.icon, state.profile === p.id, PROFILE_TOOLTIPS[p.id])).join('')}
+          </div>
+        `),
+
+    visibilityTiles && sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${visibilityTiles}
+          </div>
+        `),
+
+    colorTiles && sectionCard('color', t.colorAdjustments, collapsedSections.color, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${colorTiles}
+          </div>
+        `),
+
+    contentTiles && sectionCard('content', t.contentAdjustments, collapsedSections.content, `
+          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
+            ${contentTiles}
+          </div>
+        `),
+  ])
 
   return `
     <div class="accessibility-widget-header">
@@ -124,58 +211,7 @@ export function renderPanel(
 
     <div class="accessibility-widget-body">
       <div class="accessibility-widget-body-container">
-        ${sectionCard('settings', t.widgetSettings, collapsedSections.settings, `
-          <div class="accessibility-widget-setting-row">
-            <span class="accessibility-widget-setting-label">${t.widgetSize}</span>
-            ${sizeSwitch(size, t.widgetSize, t.smallSize, t.largeSize)}
-          </div>
-          <div class="accessibility-widget-setting-row accessibility-widget-setting-row--stack">
-            <span class="accessibility-widget-setting-label">${t.widgetPosition}</span>
-            ${positionSwitch(position, t.widgetPosition, t.leftPosition, t.rightPosition)}
-          </div>
-        `)}
-
-        ${sectionCard('profiles', t.profiles, collapsedSections.profiles, `
-          <div class="accessibility-widget-grid">
-            ${PROFILES.map(p => profileCard(p.id, p.label, p.icon, state.profile === p.id, PROFILE_TOOLTIPS[p.id])).join('')}
-          </div>
-        `)}
-
-        ${sectionCard('visibility', t.visibilityAdjustments, collapsedSections.visibility, `
-          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-            ${adjustmentTile(state, 'readingLens',     ICONS.readingLens,    t.readingLens, TOOL_TOOLTIPS.readingLens)}
-            ${adjustmentTile(state, 'bigCursor',       ICONS.bigCursor,      t.bigCursor, TOOL_TOOLTIPS.bigCursor)}
-            ${adjustmentTile(state, 'readingMask',     ICONS.readingMask,    t.readingMask, TOOL_TOOLTIPS.readingMask)}
-            ${adjustmentTile(state, 'readingGuide',    ICONS.readingGuide,   t.readingGuide, TOOL_TOOLTIPS.readingGuide)}
-            ${toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure })}
-            ${adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages)}
-            ${adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations)}
-          </div>
-        `)}
-
-        ${sectionCard('color', t.colorAdjustments, collapsedSections.color, `
-          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-            ${adjustmentTile(state, 'darkContrast', ICONS.darkContrast, t.darkContrast, TOOL_TOOLTIPS.darkContrast)}
-            ${adjustmentTile(state, 'lightContrast', ICONS.lightContrast, t.lightContrast, TOOL_TOOLTIPS.lightContrast)}
-            ${adjustmentTile(state, 'highContrast', ICONS.highContrast, t.highContrast, TOOL_TOOLTIPS.highContrast)}
-            ${adjustmentTile(state, 'monochrome', ICONS.monochrome, t.monochrome, TOOL_TOOLTIPS.monochrome)}
-            ${adjustmentTile(state, 'invertColors', ICONS.invertColors, t.invertColors, TOOL_TOOLTIPS.invertColors)}
-            ${adjustmentTile(state, 'colorBlind', ICONS.colorBlindVisual, t.colorBlind, TOOL_TOOLTIPS.colorBlind)}
-          </div>
-        `)}
-
-        ${sectionCard('content', t.contentAdjustments, collapsedSections.content, `
-          <div class="accessibility-widget-grid accessibility-widget-grid-tools">
-            ${legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts)}
-            ${adjustmentTile(state, 'highlightTitles', ICONS.highlightTitles, t.highlightTitles, TOOL_TOOLTIPS.highlightTitles)}
-            ${adjustmentTile(state, 'fontSize',        ICONS.fontSizing,     t.fontSize, TOOL_TOOLTIPS.fontSize)}
-            ${adjustmentTile(state, 'textMagnifier',   ICONS.textMagnifier,  t.textMagnifier, TOOL_TOOLTIPS.textMagnifier)}
-            ${adjustmentTile(state, 'highlightLinks',  ICONS.highlightLinks, t.highlightLinks, TOOL_TOOLTIPS.highlightLinks)}
-            ${adjustmentTile(state, 'lineHeight',      ICONS.lineHeight,     t.lineHeight, TOOL_TOOLTIPS.lineHeight)}
-            ${adjustmentTile(state, 'letterSpacing',   ICONS.letterSpacing,  t.letterSpacing, TOOL_TOOLTIPS.letterSpacing)}
-            ${toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment })}
-          </div>
-        `)}
+        ${sections}
       </div>
     </div>
 

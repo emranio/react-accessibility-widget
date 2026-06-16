@@ -11,8 +11,18 @@ export {
   type ReactAccessibilityWidgetProps,
 } from './widget'
 export { useAccessibilityWidget } from './use-accessibility-widget'
+export { AccessibilityStatement, type AccessibilityStatementProps } from './accessibility-statement'
+export { generateAccessibilityStatement } from '../core'
 
 export type {
   AccessibilityWidgetConfig,
   AccessibilityWidgetState,
+  AccessibilityProfile,
+  ToolKey,
+  AccessibilityStatementOptions,
+  GeneratedAccessibilityStatement,
+  ComplianceStandard,
+  ConformanceStatus,
+  WcagLevel,
+  WcagVersion,
 } from '../core'

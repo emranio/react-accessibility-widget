@@ -7,6 +7,16 @@
  */
 export { AccessibilityWidget } from './widget'
 
+export {
+  generateAccessibilityStatement,
+  type AccessibilityStatementOptions,
+  type GeneratedAccessibilityStatement,
+  type ComplianceStandard,
+  type ConformanceStatus,
+  type WcagLevel,
+  type WcagVersion,
+} from './statement'
+
 export type {
   AccessibilityProfile,
   AccessibilityWidgetConfig,
@@ -16,6 +26,7 @@ export type {
   PageStructureTab,
   Position,
   TextAlignment,
+  ToolKey,
   TriggerScheme,
   WidgetSize,
 } from './types'

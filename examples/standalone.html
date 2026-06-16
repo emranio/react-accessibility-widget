@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accessibility Widget — standalone embed example</title>
+  </head>
+  <body>
+    <main>
+      <h1>Standalone embed example</h1>
+      <p>
+        This page has no React. The widget is added with a single
+        <code>&lt;script&gt;</code> tag. Open it from the floating button.
+      </p>
+      <p><a href="https://example.com">A sample link</a> for the link tools.</p>
+    </main>
+
+    <!--
+      Option A — auto-mount from data attributes (recommended).
+      Build first with `npm run build`, which emits dist/accessibility-widget.global.js.
+      The reading fonts must be served at /accessibility-widget/fonts/ (copy the
+      package's `public/accessibility-widget` folder to your site root).
+    -->
+    <script
+      src="../dist/accessibility-widget.global.js"
+      data-title="Accessibility"
+      data-accent-color="#1d4ed8"
+      data-position="right"
+      data-size="S"
+    ></script>
+
+    <!--
+      Option B — programmatic control. Disable auto-mount, then call init():
+
+      <script src="../dist/accessibility-widget.global.js" data-auto="false"></script>
+      <script>
+        AccessibilityWidget.init({ accentColor: '#1d4ed8', position: 'left' })
+      </script>
+    -->
+  </body>
+</html>

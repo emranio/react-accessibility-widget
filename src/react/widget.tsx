@@ -75,6 +75,18 @@ export function AccessibilityWidget(props: AccessibilityWidgetProps) {
     instanceRef.current.setTheme(props.theme)
   }, [props.theme])
 
+  useEffect(() => {
+    if (!instanceRef.current) return
+    instanceRef.current.setHiddenProfiles(props.hiddenProfiles)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(props.hiddenProfiles)])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    instanceRef.current.setHiddenTools(props.hiddenTools)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(props.hiddenTools)])
+
   return null
 }
 

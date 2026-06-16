@@ -25,6 +25,7 @@ import {
   type PageStructureTab,
   type Position,
   type TextAlignment,
+  type ToolKey,
   type TriggerScheme,
   type WidgetSize,
 } from './types'
@@ -308,6 +309,18 @@ export class AccessibilityWidget {
     this.applyTriggerScheme()
   }
 
+  /** Set which profiles are hidden from the panel (undefined shows all). */
+  setHiddenProfiles(hiddenProfiles?: AccessibilityProfile[]): void {
+    this.config.hiddenProfiles = hiddenProfiles
+    this.update()
+  }
+
+  /** Set which tools are hidden from the panel (undefined shows all). */
+  setHiddenTools(hiddenTools?: ToolKey[]): void {
+    this.config.hiddenTools = hiddenTools
+    this.update()
+  }
+
   // ── Theming ────────────────────────────────────────────────────────────
 
   private applyOffset(): void {
@@ -550,6 +563,8 @@ export class AccessibilityWidget {
       title: this.getTitle(),
       position: this.config.position!,
       collapsedSections: this.collapsedSections,
+      hiddenProfiles: this.config.hiddenProfiles,
+      hiddenTools: this.config.hiddenTools,
     })
     this.renderStructureDialog()
     this.restorePanelFocus(focusSelector)

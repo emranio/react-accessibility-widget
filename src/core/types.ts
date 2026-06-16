@@ -30,6 +30,30 @@ export type AccessibilityProfile =
 /** Trigger button colour preset. */
 export type TriggerScheme = 'auto' | 'dark' | 'light'
 
+/** Identifier for a panel tool, used to show/hide individual tools via config. */
+export type ToolKey =
+  | 'legibleFonts'
+  | 'highlightTitles'
+  | 'fontSize'
+  | 'textMagnifier'
+  | 'highlightLinks'
+  | 'lineHeight'
+  | 'letterSpacing'
+  | 'textAlignment'
+  | 'darkContrast'
+  | 'lightContrast'
+  | 'highContrast'
+  | 'monochrome'
+  | 'invertColors'
+  | 'colorBlind'
+  | 'readingLens'
+  | 'bigCursor'
+  | 'readingMask'
+  | 'readingGuide'
+  | 'pageStructure'
+  | 'hideImages'
+  | 'offAnimations'
+
 /** Configuration accepted by the widget constructor and React props. */
 export interface AccessibilityWidgetConfig {
   title?: string
@@ -52,6 +76,10 @@ export interface AccessibilityWidgetConfig {
    * - 'light' — white background, dark icon
    */
   triggerScheme?: TriggerScheme
+  /** Profiles to hide from the panel (omit to show all). */
+  hiddenProfiles?: AccessibilityProfile[]
+  /** Tools to hide from the panel (omit to show all). A section with no visible tools is hidden. */
+  hiddenTools?: ToolKey[]
   persistence?: boolean
   onOpen?: () => void
   onClose?: () => void
