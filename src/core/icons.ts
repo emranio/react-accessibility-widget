@@ -48,6 +48,8 @@ import { __iconNode as zapIcon } from 'lucide-react/dist/esm/icons/zap.mjs'
 import { __iconNode as zoomInIcon } from 'lucide-react/dist/esm/icons/zoom-in.mjs'
 import { __iconNode as earIcon } from 'lucide-react/dist/esm/icons/ear.mjs'
 import { __iconNode as keyboardIcon } from 'lucide-react/dist/esm/icons/keyboard.mjs'
+import { __iconNode as bookAIcon } from 'lucide-react/dist/esm/icons/book-a.mjs'
+import { __iconNode as sparklesIcon } from 'lucide-react/dist/esm/icons/sparkles.mjs'
 import { __iconNode as squareDashedMousePointerIcon } from 'lucide-react/dist/esm/icons/square-dashed-mouse-pointer.mjs'
 
 import { escapeAttr } from './utils/html'
@@ -107,6 +109,9 @@ export const ICONS = {
   readingMask: lucideSvg(rows3Icon),
   readingGuide: lucideSvg(moveHorizontalIcon),
   readAloud: lucideSvg(volume2Icon),
+  dictionary: lucideSvg(bookAIcon),
+  simplify: lucideSvg(sparklesIcon),
+  virtualKeyboard: lucideSvg(keyboardIcon),
   focusHighlight: lucideSvg(squareDashedMousePointerIcon),
   highlightLinks: lucideSvg(linkIcon),
   lineHeight: lucideSvg(betweenVerticalStartIcon),

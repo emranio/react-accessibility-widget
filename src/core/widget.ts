@@ -11,6 +11,8 @@ import { ICONS } from './icons'
 import { translations } from './i18n'
 import { releaseFocus, trapFocus } from './keyboard'
 import { collectPageStructure, renderPageStructureDialog } from './page-structure'
+import { setDictionaryLookup } from './effects/dictionary'
+import { setSimplifyProvider } from './effects/simplify'
 import { osPreferenceDefaults, readOsPreferences } from './os-preferences'
 import { hasPersistedState, loadState, saveState } from './persistence'
 import { PROFILE_PRESETS } from './profiles'
@@ -25,8 +27,10 @@ import {
   type AdjustmentLevel,
   type PageStructureTab,
   type Position,
+  type KeyboardShortcut,
   type TextAlignment,
   type ToolKey,
+  type WidgetEvent,
   type WidgetSize,
 } from './types'
 import { setCssVar } from './utils/css'
@@ -56,6 +60,20 @@ const PROFILE_LABEL: Record<AccessibilityProfile, string> = {
   'cognitive-disability': translations.cognitiveDisability,
   'keyboard-motor': translations.keyboardMotor,
   'blind-screen-reader': translations.blindScreenReader,
+}
+
+/** Default open/close shortcut. */
+const DEFAULT_SHORTCUT: KeyboardShortcut = { key: 'u', ctrlKey: true }
+
+/** Human-readable label for a shortcut, e.g. "CTRL + U". */
+function shortcutLabel(sc: KeyboardShortcut): string {
+  const parts: string[] = []
+  if (sc.ctrlKey) parts.push('CTRL')
+  if (sc.altKey) parts.push('ALT')
+  if (sc.shiftKey) parts.push('SHIFT')
+  if (sc.metaKey) parts.push('CMD')
+  parts.push(sc.key.toUpperCase())
+  return parts.join(' + ')
 }
 
 type NormalizedWidgetSize = 'S' | 'L'
@@ -140,9 +158,15 @@ export class AccessibilityWidget {
   }
   private readonly shortcutListenerOptions: AddEventListenerOptions = { capture: true }
   private readonly handleGlobalShortcut = (e: KeyboardEvent): void => {
-    const key = e.key.toLowerCase()
-    const isShortcut = e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && (key === 'u' || e.code === 'KeyU')
-    if (!isShortcut) return
+    const sc = this.resolveShortcut()
+    if (!sc) return
+    const matches =
+      e.key.toLowerCase() === sc.key.toLowerCase() &&
+      e.ctrlKey === !!sc.ctrlKey &&
+      e.altKey === !!sc.altKey &&
+      e.shiftKey === !!sc.shiftKey &&
+      e.metaKey === !!sc.metaKey
+    if (!matches) return
     e.preventDefault()
     e.stopPropagation()
     this.toggle()
@@ -229,6 +253,9 @@ export class AccessibilityWidget {
       }
     }
 
+    setDictionaryLookup(this.config.dictionaryLookup ?? null)
+    setSimplifyProvider(this.config.onSimplify ?? null)
+
     this.update()
     applyEffects(this.state)
   }
@@ -259,6 +286,7 @@ export class AccessibilityWidget {
     this.isOpen = true
     this.trigger?.setAttribute('aria-expanded', 'true')
     this.config.onOpen?.()
+    this.emit({ type: 'open' })
     this.update()
     if (this.panel && this.trigger) trapFocus(this.panel, this.trigger)
   }
@@ -269,6 +297,7 @@ export class AccessibilityWidget {
     this.pageStructureOpen = false
     this.trigger?.setAttribute('aria-expanded', 'false')
     this.config.onClose?.()
+    this.emit({ type: 'close' })
     releaseFocus()
     this.update()
   }
@@ -290,6 +319,7 @@ export class AccessibilityWidget {
     applyEffects(this.state)
     this.announce('All settings reset')
     this.config.onReset?.()
+    this.emit({ type: 'reset' })
     this.update(scroll, focus)
   }
 
@@ -544,6 +574,7 @@ export class AccessibilityWidget {
       this.state = { ...DEFAULT_STATE, profile: id, ...preset }
       this.announce(`${PROFILE_LABEL[id] ?? id} profile applied`)
     }
+    this.emit({ type: 'profile', profile: this.state.profile })
     this.commit()
   }
 
@@ -560,6 +591,7 @@ export class AccessibilityWidget {
     ;(this.state as unknown as Record<string, unknown>)[key] = next
     const label = (translations as unknown as Record<string, string>)[key] ?? key
     this.announce(maxLevel <= 1 ? `${label} ${next > 0 ? 'on' : 'off'}` : next > 0 ? `${label}, level ${next} of ${maxLevel}` : `${label} off`)
+    this.emit({ type: 'tool', tool: key, level: next })
     this.commit()
   }
 
@@ -567,6 +599,7 @@ export class AccessibilityWidget {
     const currentIndex = ALIGNMENT_LEVELS.indexOf(this.state.textAlignment)
     this.state.textAlignment = ALIGNMENT_LEVELS[(currentIndex + 1) % ALIGNMENT_LEVELS.length]
     this.announce(`Text alignment ${this.state.textAlignment}`)
+    this.emit({ type: 'alignment', alignment: this.state.textAlignment })
     this.commit()
   }
 
@@ -589,6 +622,28 @@ export class AccessibilityWidget {
     if (this.liveRegion) this.liveRegion.textContent = message
   }
 
+  /** The active toggle shortcut, or null when disabled. */
+  private resolveShortcut(): KeyboardShortcut | null {
+    const sc = this.config.shortcut
+    if (sc === false) return null
+    return sc ?? DEFAULT_SHORTCUT
+  }
+
+  /** Header label for the active shortcut, or null when disabled. */
+  private getShortcutLabel(): string | null {
+    const sc = this.resolveShortcut()
+    return sc ? shortcutLabel(sc) : null
+  }
+
+  /** Emit a privacy-respecting analytics event; never throws into the widget. */
+  private emit(event: WidgetEvent): void {
+    try {
+      this.config.onEvent?.(event)
+    } catch {
+      // Analytics must never break the widget.
+    }
+  }
+
   // ── Rendering ──────────────────────────────────────────────────────────
 
   private update(
@@ -606,6 +661,8 @@ export class AccessibilityWidget {
       collapsedSections: this.collapsedSections,
       hiddenProfiles: this.config.hiddenProfiles,
       hiddenTools: this.config.hiddenTools,
+      shortcutLabel: this.getShortcutLabel(),
+      simplifyEnabled: !!this.config.onSimplify,
     })
     this.renderStructureDialog()
     this.restorePanelFocus(focusSelector)

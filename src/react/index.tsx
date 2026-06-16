@@ -12,12 +12,15 @@ export {
 } from './widget'
 export { useAccessibilityWidget } from './use-accessibility-widget'
 export { AccessibilityStatement, type AccessibilityStatementProps } from './accessibility-statement'
-export { generateAccessibilityStatement } from '../core'
+export { generateAccessibilityStatement, auditAccessibility } from '../core'
+export type { AccessibilityIssue, AuditImpact } from '../core'
 
 export type {
   AccessibilityWidgetConfig,
   AccessibilityWidgetState,
   AccessibilityProfile,
+  KeyboardShortcut,
+  WidgetEvent,
   ToolKey,
   AccessibilityStatementOptions,
   GeneratedAccessibilityStatement,

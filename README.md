@@ -112,6 +112,8 @@ Common config options:
 - `size` — `'S'` or `'L'`.
 - `offsetX` / `offsetY` — trigger distance from its anchored edge (px).
 - `hiddenProfiles` / `hiddenTools` — hide specific profiles/tools.
+- `shortcut` — keyboard shortcut to toggle the panel, e.g. `{ key: 'k', altKey: true }`, or `false` to disable (default Ctrl+U).
+- `onEvent` — opt-in analytics callback receiving privacy-respecting events (`open` / `close` / `tool` / `profile` / `reset` / `alignment`); no personal data.
 - `persistence` — persist the visitor's settings to `localStorage` (default `true`).
 - `theme` — lower-level override for `primary` / `background` / `text` (`accentColor` wins over `theme.primary`).
 

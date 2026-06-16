@@ -50,10 +50,35 @@ export type ToolKey =
   | 'readingMask'
   | 'readingGuide'
   | 'readAloud'
+  | 'dictionary'
+  | 'simplify'
+  | 'virtualKeyboard'
   | 'focusHighlight'
   | 'pageStructure'
   | 'hideImages'
   | 'offAnimations'
+
+/** A keyboard shortcut definition for toggling the panel. */
+export interface KeyboardShortcut {
+  key: string
+  ctrlKey?: boolean
+  altKey?: boolean
+  shiftKey?: boolean
+  metaKey?: boolean
+}
+
+/** An analytics event emitted by the widget. Carries no personal data. */
+export interface WidgetEvent {
+  type: 'open' | 'close' | 'reset' | 'tool' | 'profile' | 'alignment'
+  /** Tool key, for `tool` events. */
+  tool?: string
+  /** New level, for `tool` events. */
+  level?: number
+  /** Active profile (null when cleared), for `profile` events. */
+  profile?: AccessibilityProfile | null
+  /** New alignment, for `alignment` events. */
+  alignment?: TextAlignment
+}
 
 /** Configuration accepted by the widget constructor and React props. */
 export interface AccessibilityWidgetConfig {
@@ -80,10 +105,18 @@ export interface AccessibilityWidgetConfig {
    * a fresh visit. Never overrides a persisted or explicit choice. Default true.
    */
   respectOsPreferences?: boolean
+  /** Keyboard shortcut to toggle the panel, or `false` to disable. Default Ctrl+U. */
+  shortcut?: KeyboardShortcut | false
   persistence?: boolean
   onOpen?: () => void
   onClose?: () => void
   onReset?: () => void
+  /** Opt-in analytics hook; receives privacy-respecting widget events. */
+  onEvent?: (event: WidgetEvent) => void
+  /** Custom dictionary lookup for the Dictionary tool. Defaults to dictionaryapi.dev. */
+  dictionaryLookup?: (word: string) => Promise<string | null>
+  /** Provider for the Simplify tool. When omitted, the Simplify tool is hidden. */
+  onSimplify?: (text: string) => Promise<string>
 }
 
 /** The complete, persisted runtime state of the widget. */
@@ -102,6 +135,9 @@ export interface AccessibilityWidgetState {
   readingMask: AdjustmentLevel
   readingGuide: AdjustmentLevel
   readAloud: AdjustmentLevel
+  dictionary: AdjustmentLevel
+  simplify: AdjustmentLevel
+  virtualKeyboard: AdjustmentLevel
   focusHighlight: AdjustmentLevel
   darkContrast: AdjustmentLevel
   lightContrast: AdjustmentLevel
@@ -145,6 +181,9 @@ export const DEFAULT_STATE: AccessibilityWidgetState = {
   readingMask: 0,
   readingGuide: 0,
   readAloud: 0,
+  dictionary: 0,
+  simplify: 0,
+  virtualKeyboard: 0,
   focusHighlight: 0,
   darkContrast: 0,
   lightContrast: 0,

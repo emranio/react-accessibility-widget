@@ -7,6 +7,8 @@
  */
 export { AccessibilityWidget } from './widget'
 
+export { auditAccessibility, type AccessibilityIssue, type AuditImpact } from './audit'
+
 export {
   generateAccessibilityStatement,
   type AccessibilityStatementOptions,
@@ -23,9 +25,11 @@ export type {
   AccessibilityWidgetState,
   PageStructureData,
   PageStructureItem,
+  KeyboardShortcut,
   PageStructureTab,
   Position,
   TextAlignment,
   ToolKey,
+  WidgetEvent,
   WidgetSize,
 } from './types'

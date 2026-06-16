@@ -50,6 +50,9 @@ export interface Translations {
   readingMask: string
   readingGuide: string
   readAloud: string
+  dictionary: string
+  simplify: string
+  virtualKeyboard: string
   focusHighlight: string
   highlightLinks: string
   lineHeight: string

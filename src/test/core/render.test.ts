@@ -213,7 +213,7 @@ describe('renderPanel', () => {
   it('renders tooltip text for every profile and widget tool', () => {
     const html = renderPanel(freshState(), 'S')
     const tooltipCount = (html.match(/accessibility-widget-tooltip/g) ?? []).length
-    expect(tooltipCount).toBe(32)
+    expect(tooltipCount).toBe(34)
     expect(html).toContain('Stops animation, hides images')
     expect(html).toContain('Increases page text size across four levels.')
     expect(html).toContain('Opens a headings, landmarks, and links navigator')

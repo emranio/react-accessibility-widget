@@ -61,6 +61,9 @@ const TOOL_TOOLTIPS = {
   readingMask: 'Dims surrounding content and keeps one reading band in focus.',
   readingGuide: 'Adds a guide line that follows the pointer.',
   readAloud: 'Reads page text aloud when you click it (text-to-speech).',
+  dictionary: 'Shows the definition of a word when you double-click it.',
+  simplify: 'Rewrites the selected text in simpler language.',
+  virtualKeyboard: 'Shows an on-screen keyboard for typing without a physical keyboard.',
   focusHighlight: 'Adds a strong outline around the focused element for keyboard navigation.',
   pageStructure: 'Opens a headings, landmarks, and links navigator for the current page.',
   hideImages: 'Hides images and videos from the page.',
@@ -107,6 +110,8 @@ export function renderPanel(
     collapsedSections?: CollapsedSections
     hiddenProfiles?: AccessibilityProfile[]
     hiddenTools?: ToolKey[]
+    shortcutLabel?: string | null
+    simplifyEnabled?: boolean
   } = {},
 ): string {
   const t = translations
@@ -130,6 +135,7 @@ export function renderPanel(
   const hiddenTools = new Set<ToolKey>(options.hiddenTools ?? [])
   const visibleProfiles = PROFILES.filter(p => !hiddenProfiles.has(p.id))
   const show = (key: ToolKey): boolean => !hiddenTools.has(key)
+  const simplifyEnabled = options.simplifyEnabled ?? false
 
   const contentTiles = join([
     show('legibleFonts') && legibleFontsTile(state, t, TOOL_TOOLTIPS.legibleFonts),
@@ -140,6 +146,8 @@ export function renderPanel(
     show('lineHeight') && adjustmentTile(state, 'lineHeight', ICONS.lineHeight, t.lineHeight, TOOL_TOOLTIPS.lineHeight),
     show('letterSpacing') && adjustmentTile(state, 'letterSpacing', ICONS.letterSpacing, t.letterSpacing, TOOL_TOOLTIPS.letterSpacing),
     show('textAlignment') && toolTile({ key: 'textAlignment', icon: alignmentIcon(state.textAlignment), label: t.textAlign, level: alignmentLevel(state.textAlignment), maxLevel: TEXT_ALIGNMENT_MAX_LEVEL, tooltip: TOOL_TOOLTIPS.textAlignment }),
+    show('dictionary') && adjustmentTile(state, 'dictionary', ICONS.dictionary, t.dictionary, TOOL_TOOLTIPS.dictionary),
+    simplifyEnabled && show('simplify') && adjustmentTile(state, 'simplify', ICONS.simplify, t.simplify, TOOL_TOOLTIPS.simplify),
   ])
 
   const colorTiles = join([
@@ -158,6 +166,7 @@ export function renderPanel(
     show('readingGuide') && adjustmentTile(state, 'readingGuide', ICONS.readingGuide, t.readingGuide, TOOL_TOOLTIPS.readingGuide),
     show('readAloud') && adjustmentTile(state, 'readAloud', ICONS.readAloud, t.readAloud, TOOL_TOOLTIPS.readAloud),
     show('focusHighlight') && adjustmentTile(state, 'focusHighlight', ICONS.focusHighlight, t.focusHighlight, TOOL_TOOLTIPS.focusHighlight),
+    show('virtualKeyboard') && adjustmentTile(state, 'virtualKeyboard', ICONS.virtualKeyboard, t.virtualKeyboard, TOOL_TOOLTIPS.virtualKeyboard),
     show('pageStructure') && toolTile({ key: 'pageStructure', icon: ICONS.pageStructure, label: t.pageStructure, level: options.pageStructureOpen ? 1 : 0, maxLevel: 1, tooltip: TOOL_TOOLTIPS.pageStructure }),
     show('hideImages') && adjustmentTile(state, 'hideImages', ICONS.hideImages, t.hideImages, TOOL_TOOLTIPS.hideImages),
     show('offAnimations') && adjustmentTile(state, 'offAnimations', ICONS.offAnimations, t.offAnimations, TOOL_TOOLTIPS.offAnimations),
@@ -208,7 +217,7 @@ export function renderPanel(
           <div class="accessibility-widget-header-title">
             <span>${title}</span>
           </div>
-          <kbd class="accessibility-widget-header-shortcut">CTRL + U</kbd>
+          ${options.shortcutLabel === null ? '' : `<kbd class="accessibility-widget-header-shortcut">${escapeHtml(options.shortcutLabel ?? 'CTRL + U')}</kbd>`}
           <div class="accessibility-widget-header-sub accessibility-widget-sr-only">${t.subtitle}</div>
         </div>
       </div>

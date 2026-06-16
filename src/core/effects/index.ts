@@ -19,6 +19,9 @@ import { disableReadingGuide, enableReadingGuide } from './reading-guide'
 import { disableReadingLens, enableReadingLens } from './reading-lens'
 import { disableReadingMask, enableReadingMask } from './reading-mask'
 import { disableReadAloud, enableReadAloud } from './read-aloud'
+import { disableDictionary, enableDictionary } from './dictionary'
+import { disableSimplify, enableSimplify } from './simplify'
+import { disableVirtualKeyboard, enableVirtualKeyboard } from './virtual-keyboard'
 import { syncWrapperVars } from './wrapper-vars'
 
 export { HOST_WRAPPER_ID, ensureHostWrapper, unwrapHost } from './host'
@@ -79,6 +82,12 @@ export function applyEffects(state: AccessibilityWidgetState): void {
   else disableReadingGuide()
   if (state.readAloud > 0) enableReadAloud()
   else disableReadAloud()
+  if (state.dictionary > 0) enableDictionary()
+  else disableDictionary()
+  if (state.simplify > 0) enableSimplify()
+  else disableSimplify()
+  if (state.virtualKeyboard > 0) enableVirtualKeyboard()
+  else disableVirtualKeyboard()
 }
 
 /** Remove every applied effect: classes, dynamic CSS, filter, and reading aids. */
@@ -97,4 +106,7 @@ export function clearEffects(): void {
   disableReadingMask()
   disableReadingGuide()
   disableReadAloud()
+  disableDictionary()
+  disableSimplify()
+  disableVirtualKeyboard()
 }
